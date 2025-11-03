@@ -1,0 +1,51 @@
+---
+export interface Props {
+	title: string;
+	description: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content={description} />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+		
+		<!-- Tailwind CSS -->
+		<script src="https://cdn.tailwindcss.com"></script>
+		<script is:inline>
+			window.tailwind?.config({
+				theme: {
+					extend: {
+						colors: {
+							orange: {
+								50: '#fff7ed',
+								100: '#ffedd5',
+								200: '#fed7aa',
+								300: '#fdba74',
+								400: '#fb923c',
+								500: '#f97316',
+								600: '#ea580c',
+								700: '#c2410c',
+								800: '#9a3412',
+								900: '#7c2d12',
+							}
+						}
+					}
+				}
+			});
+		</script>
+		
+		<!-- Additional head content from pages -->
+		<slot name="head" />
+	</head>
+	<body class="bg-gray-50 text-gray-900">
+		<slot />
+	</body>
+</html>

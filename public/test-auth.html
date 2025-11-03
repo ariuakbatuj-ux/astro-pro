@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auth API Test</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .test-card {
+      background: white;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    button {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin: 5px;
+    }
+    button:hover {
+      background: #2563eb;
+    }
+    .success {
+      color: #10b981;
+      background: #d1fae5;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+    .error {
+      color: #ef4444;
+      background: #fee2e2;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+    pre {
+      background: #1f2937;
+      color: #10b981;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 12px;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .status-success { background: #10b981; color: white; }
+    .status-error { background: #ef4444; color: white; }
+    .status-warning { background: #f59e0b; color: white; }
+  </style>
+</head>
+<body>
+  <h1>🔐 Authentication API Test</h1>
+  
+  <div class="test-card">
+    <h2>Test 1: Admin Login</h2>
+    <p>Testing with admin credentials: <code>admin</code> / <code>admin123</code></p>
+    <button onclick="testAdminLogin()">🔑 Test Admin Login</button>
+    <div id="adminResult"></div>
+  </div>
+
+  <div class="test-card">
+    <h2>Test 2: Demo User Registration</h2>
+    <p>Testing demo registration (Supabase not configured)</p>
+    <button onclick="testDemoSignup()">📝 Test Demo Signup</button>
+    <div id="signupResult"></div>
+  </div>
+
+  <div class="test-card">
+    <h2>Test 3: Products API</h2>
+    <p>Testing featured products endpoint</p>
+    <button onclick="testProductsAPI()">📦 Test Products API</button>
+    <div id="productsResult"></div>
+  </div>
+
+  <div class="test-card">
+    <h2>Test 4: Setup Check</h2>
+    <p>Check Supabase configuration status</p>
+    <button onclick="testSetupCheck()">⚙️ Test Setup Check</button>
+    <div id="setupResult"></div>
+  </div>
+
+  <script>
+    function displayResult(elementId, status, message, data = null) {
+      const element = document.getElementById(elementId);
+      const statusClass = status === 'success' ? 'success' : 'error';
+      const badgeClass = status === 'success' ? 'status-success' : 'status-error';
+      
+      let html = `
+        <div class="${statusClass}">
+          <span class="status-badge ${badgeClass}">${status.toUpperCase()}</span>
+          <p>${message}</p>
+        </div>
+      `;
+      
+      if (data) {
+        html += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+      }
+      
+      element.innerHTML = html;
+    }
+
+    async function testAdminLogin() {
+      const resultDiv = document.getElementById('adminResult');
+      resultDiv.innerHTML = '<p>⏳ Testing...</p>';
+      
+      try {
+        const response = await fetch('/api/auth/signin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            emailOrUsername: 'admin',
+            password: 'admin123'
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+          displayResult('adminResult', 'success', 
+            `✅ Admin login successful! Token generated.`, data);
+        } else {
+          displayResult('adminResult', 'error', 
+            `❌ Login failed: ${data.error || 'Unknown error'}`, data);
+        }
+      } catch (error) {
+        displayResult('adminResult', 'error', 
+          `❌ Network error: ${error.message}. Is the server running?`);
+      }
+    }
+
+    async function testDemoSignup() {
+      const resultDiv = document.getElementById('signupResult');
+      resultDiv.innerHTML = '<p>⏳ Testing...</p>';
+      
+      try {
+        const response = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: 'test@example.com',
+            username: 'testuser',
+            password: 'testpassword123',
+            name: 'Test User'
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok || response.status === 201) {
+          displayResult('signupResult', 'success', 
+            `✅ ${data.message || 'Demo signup successful!'}`, data);
+        } else {
+          displayResult('signupResult', 'error', 
+            `❌ Signup failed: ${data.error || 'Unknown error'}`, data);
+        }
+      } catch (error) {
+        displayResult('signupResult', 'error', 
+          `❌ Network error: ${error.message}`);
+      }
+    }
+
+    async function testProductsAPI() {
+      const resultDiv = document.getElementById('productsResult');
+      resultDiv.innerHTML = '<p>⏳ Testing...</p>';
+      
+      try {
+        const response = await fetch('/api/products?featured=true');
+        const data = await response.json();
+        
+        if (response.ok) {
+          displayResult('productsResult', 'success', 
+            `✅ Found ${data.count} featured products from ${data.source}`, 
+            { count: data.count, source: data.source, firstProduct: data.products[0]?.name });
+        } else {
+          displayResult('productsResult', 'error', 
+            `❌ Failed to fetch products`, data);
+        }
+      } catch (error) {
+        displayResult('productsResult', 'error', 
+          `❌ Network error: ${error.message}`);
+      }
+    }
+
+    async function testSetupCheck() {
+      const resultDiv = document.getElementById('setupResult');
+      resultDiv.innerHTML = '<p>⏳ Testing...</p>';
+      
+      try {
+        const response = await fetch('/api/setup/check');
+        const data = await response.json();
+        
+        if (response.ok) {
+          const statusMessage = data.configured ? 
+            '✅ Supabase is configured!' : 
+            '⚠️ Supabase not yet configured (using temporary data)';
+          
+          displayResult('setupResult', data.configured ? 'success' : 'warning', 
+            statusMessage, data);
+        } else {
+          displayResult('setupResult', 'error', 
+            `❌ Setup check failed`, data);
+        }
+      } catch (error) {
+        displayResult('setupResult', 'error', 
+          `❌ Network error: ${error.message}`);
+      }
+    }
+
+    // Run basic tests on load
+    window.addEventListener('load', () => {
+      console.log('🔧 Auth API Test Page Loaded');
+      console.log('Click buttons above to run tests');
+    });
+  </script>
+</body>
+</html>

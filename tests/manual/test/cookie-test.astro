@@ -1,0 +1,110 @@
+---
+// Simple cookie test page
+---
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cookie Test - ShopHub</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      max-width: 600px; 
+      margin: 50px auto; 
+      padding: 20px;
+      line-height: 1.6;
+    }
+    button {
+      background: #f97316;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 10px 5px 10px 0;
+    }
+    button:hover { background: #ea580c; }
+    .debug { background: #f3f4f6; padding: 15px; border-radius: 6px; margin: 15px 0; }
+    .step { background: #ecfdf5; border-left: 4px solid #22c55e; padding: 10px; margin: 10px 0; }
+  </style>
+</head>
+<body>
+  <h1>🍪 Cookie & Wishlist Test</h1>
+  
+  <div class="step">
+    <strong>Step 1:</strong> Set authentication cookie for User 3 (ariuka)
+    <button onclick="setTestCookie()">Set Auth Cookie</button>
+  </div>
+
+  <div class="step">
+    <strong>Step 2:</strong> Test wishlist API directly
+    <button onclick="testWishlistAPI()">Test Wishlist API</button>
+  </div>
+
+  <div class="step">
+    <strong>Step 3:</strong> Visit profile page
+    <button onclick="window.location.href='/shop/profile'">Go to Profile</button>
+  </div>
+
+  <div class="debug">
+    <h3>🔍 Debug Information:</h3>
+    <div id="debugInfo">Click buttons above to start testing...</div>
+  </div>
+
+  <div id="results" style="margin-top: 20px;"></div>
+
+  <script is:inline>
+    // Test token for User 3 (created using same method as signin API)
+    const TEST_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImVtYWlsIjoiYXJpdWthQGV4YW1wbGUuY29tIiwidXNlcm5hbWUiOiJhcml1a2EiLCJyb2xlIjoiY3VzdG9tZXIiLCJpYXQiOjE3Mjk4Njg3NDMsImV4cCI6MTczMDQ3MzU0M30.example-signature';
+
+    function setTestCookie() {
+      // Set cookie exactly like signin page does
+      document.cookie = `token=${TEST_TOKEN}; path=/; max-age=604800`;
+      
+      const debugInfo = document.getElementById('debugInfo');
+      debugInfo.innerHTML = `
+        <p>✅ Cookie set: <code>token=${TEST_TOKEN.substring(0, 50)}...</code></p>
+        <p>📋 Current cookies: <code>${document.cookie}</code></p>
+        <p>🔍 Token exists: ${document.cookie.includes('token=')}</p>
+      `;
+      
+      console.log('Cookie set:', document.cookie);
+    }
+
+    async function testWishlistAPI() {
+      try {
+        const response = await fetch('/api/wishlist?userId=3');
+        const data = await response.json();
+        
+        const results = document.getElementById('results');
+        if (data.success) {
+          results.innerHTML = `
+            <h3>🎉 Wishlist API Test Results:</h3>
+            <p><strong>Success:</strong> ${data.success}</p>
+            <p><strong>User:</strong> ${data.user ? data.user.username : 'N/A'}</p>
+            <p><strong>Wishlist Count:</strong> ${data.count}</p>
+            <p><strong>Items:</strong></p>
+            <ul>
+              ${data.wishlist.map(item => `<li>${item.name} - $${item.price}</li>`).join('')}
+            </ul>
+          `;
+        } else {
+          results.innerHTML = `<p style="color: red;">❌ API Error: ${data.error}</p>`;
+        }
+      } catch (error) {
+        const results = document.getElementById('results');
+        results.innerHTML = `<p style="color: red;">❌ Network Error: ${error.message}</p>`;
+      }
+    }
+
+    // Auto-check cookies on page load
+    window.addEventListener('load', function() {
+      const debugInfo = document.getElementById('debugInfo');
+      debugInfo.innerHTML = `
+        <p>📋 Initial cookies: <code>${document.cookie || 'No cookies found'}</code></p>
+        <p>🔍 Token exists: ${document.cookie.includes('token=')}</p>
+      `;
+    });
+  </script>
+</body>
+</html>

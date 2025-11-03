@@ -1,0 +1,271 @@
+---
+import { supabase } from '../lib/supabase';
+
+let status = 'Testing connection...';
+let users: any[] | null = null;
+let error: string | null = null;
+let tableExists = false;
+
+try {
+  // Test connection by trying to query users table
+  const result = await supabase
+    .from('users')
+    .select('*')
+    .limit(5);
+  
+  if (result.error) {
+    if (result.error.message.includes('does not exist')) {
+      status = '⚠️ Connected, but tables not created yet';
+      error = 'The users table does not exist. Please create your database schema first.';
+    } else {
+      error = result.error.message;
+      status = '❌ Connection failed';
+    }
+  } else {
+    status = '✅ Connection successful!';
+    users = result.data;
+    tableExists = true;
+  }
+} catch (e: any) {
+  error = e.message || 'Unknown error occurred';
+  status = '❌ Connection failed';
+}
+---
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supabase Connection Test</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    
+    h1 {
+      color: #333;
+      margin-bottom: 1rem;
+      font-size: 2rem;
+    }
+    
+    .status {
+      padding: 1rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+    
+    .success {
+      background: #d4edda;
+      color: #155724;
+      border: 2px solid #c3e6cb;
+    }
+    
+    .warning {
+      background: #fff3cd;
+      color: #856404;
+      border: 2px solid #ffeaa7;
+    }
+    
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 2px solid #f5c6cb;
+    }
+    
+    .error-details {
+      margin: 1rem 0;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-left: 4px solid #dc3545;
+      border-radius: 4px;
+    }
+    
+    .error-details pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      color: #d63384;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+    }
+    
+    .user-list {
+      margin: 1.5rem 0;
+    }
+    
+    .user-list h3 {
+      color: #495057;
+      margin-bottom: 1rem;
+    }
+    
+    .user-list ul {
+      list-style: none;
+    }
+    
+    .user-list li {
+      padding: 0.75rem;
+      margin: 0.5rem 0;
+      background: #f8f9fa;
+      border-radius: 6px;
+      border-left: 4px solid #667eea;
+    }
+    
+    .user-list strong {
+      color: #495057;
+      font-size: 1.1rem;
+    }
+    
+    .user-list em {
+      background: #667eea;
+      color: white;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-style: normal;
+      font-size: 0.8rem;
+      margin-left: 0.5rem;
+    }
+    
+    .config {
+      margin: 1.5rem 0;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+    
+    .config h3 {
+      color: #495057;
+      margin-bottom: 0.5rem;
+    }
+    
+    .config pre {
+      font-family: 'Courier New', monospace;
+      color: #6c757d;
+      line-height: 1.6;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    
+    .badge-success {
+      background: #28a745;
+      color: white;
+    }
+    
+    .badge-danger {
+      background: #dc3545;
+      color: white;
+    }
+    
+    .instructions {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: #e7f3ff;
+      border-radius: 8px;
+      border-left: 4px solid #0066cc;
+    }
+    
+    .instructions h3 {
+      color: #0066cc;
+      margin-bottom: 1rem;
+    }
+    
+    .instructions ol {
+      margin-left: 1.5rem;
+    }
+    
+    .instructions li {
+      margin: 0.5rem 0;
+      color: #495057;
+    }
+    
+    .instructions code {
+      background: #fff;
+      padding: 0.2rem 0.4rem;
+      border-radius: 3px;
+      color: #d63384;
+      font-family: 'Courier New', monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🗄️ Supabase Connection Test</h1>
+    
+    <div class={`status ${error ? (tableExists ? 'error' : 'warning') : 'success'}`}>
+      {status}
+    </div>
+    
+    {error && (
+      <div class="error-details">
+        <h3>⚠️ Details:</h3>
+        <pre>{error}</pre>
+      </div>
+    )}
+    
+    {users && users.length > 0 && (
+      <div class="user-list">
+        <h3>📋 Sample Users ({users.length} found):</h3>
+        <ul>
+          {users.map((user) => (
+            <li key={user._id}>
+              <strong>{user.username}</strong> - {user.email}
+              <em>{user.role}</em>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+    
+    {users && users.length === 0 && (
+      <div class="user-list">
+        <p>✅ Table exists, but no users found yet.</p>
+      </div>
+    )}
+    
+    <hr style="margin: 2rem 0; border: none; border-top: 1px solid #dee2e6;" />
+    
+    <div class="config">
+      <h3>⚙️ Configuration Status:</h3>
+      <pre>Database URL: {import.meta.env.APP_DATABASE_URL}
+Anon Key: {import.meta.env.APP_ANON_KEY ? '✅ Configured' : '❌ Missing'}</pre>
+    </div>
+    
+    {!tableExists && (
+      <div class="instructions">
+        <h3>📝 Next Steps:</h3>
+        <ol>
+          <li>Open your Supabase dashboard: <code>https://supabase.com/dashboard</code></li>
+          <li>Select your project: <code>hugksrivqiosqydjqqan</code></li>
+          <li>Go to <strong>SQL Editor</strong></li>
+          <li>Create your tables (users, products, etc.)</li>
+          <li>Refresh this page to test again!</li>
+        </ol>
+      </div>
+    )}
+  </div>
+</body>
+</html>

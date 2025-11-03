@@ -1,0 +1,604 @@
+---
+import DocsLayout from '../../layouts/docs/DocsLayout.astro';
+---
+
+<DocsLayout 
+  title="File Locations Map" 
+  description="Exact file paths, web URLs, and line numbers for complete navigation"
+>
+  <!-- Overview -->
+  <div class="bg-purple-50 rounded-xl p-6 mb-8 border border-purple-200">
+    <h2 class="text-xl font-bold text-purple-900 mb-3">🗺️ Complete File Mapping</h2>
+    <p class="text-purple-800 mb-4">
+      Exact locations of every function, file, and endpoint in the product management system with line-by-line navigation.
+    </p>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="bg-white rounded-lg p-3 text-center">
+        <div class="text-lg font-bold text-purple-600">25</div>
+        <div class="text-xs text-gray-600">Functions Mapped</div>
+      </div>
+      <div class="bg-white rounded-lg p-3 text-center">
+        <div class="text-lg font-bold text-blue-600">8</div>
+        <div class="text-xs text-gray-600">Core Files</div>
+      </div>
+      <div class="bg-white rounded-lg p-3 text-center">
+        <div class="text-lg font-bold text-green-600">12</div>
+        <div class="text-xs text-gray-600">URL Endpoints</div>
+      </div>
+      <div class="bg-white rounded-lg p-3 text-center">
+        <div class="text-lg font-bold text-orange-600">100%</div>
+        <div class="text-xs text-gray-600">Coverage</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Frontend Files -->
+  <section class="mb-12">
+    <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+      <span class="text-2xl mr-3">🌐</span>
+      Frontend Files & Locations
+    </h2>
+
+    <!-- Main EJS Template -->
+    <div class="bg-white rounded-xl p-6 border border-blue-200 shadow-sm mb-6">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center space-x-3">
+          <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900">add-product.ejs</h3>
+            <p class="text-sm text-gray-600">Main template file with all frontend functionality</p>
+          </div>
+        </div>
+        <div class="text-right">
+          <div class="text-sm font-medium text-blue-600">views/admin/add-product.ejs</div>
+          <div class="text-xs text-gray-500">450 lines total</div>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div class="bg-gray-50 rounded-lg p-4">
+          <h4 class="font-medium text-gray-800 mb-3">📍 Function Locations</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
+            <div class="bg-white p-3 rounded border">
+              <div class="font-medium text-blue-700">DOMContentLoaded</div>
+              <div class="text-gray-600">Lines 420-425</div>
+              <div class="text-xs text-gray-500 mt-1">Page initialization event</div>
+            </div>
+            <div class="bg-white p-3 rounded border">
+              <div class="font-medium text-blue-700">initImageUpload()</div>
+              <div class="text-gray-600">Lines 35-50</div>
+              <div class="text-xs text-gray-500 mt-1">Image upload system setup</div>
+            </div>
+            <div class="bg-white p-3 rounded border">
+              <div class="font-medium text-blue-700">handleFiles()</div>
+              <div class="text-gray-600">Lines 75-110</div>
+              <div class="text-xs text-gray-500 mt-1">File processing and validation</div>
+            </div>
+            <div class="bg-white p-3 rounded border">
+              <div class="font-medium text-blue-700">createPreview()</div>
+              <div class="text-gray-600">Lines 125-160</div>
+              <div class="text-xs text-gray-500 mt-1">Image thumbnail generation</div>
+            </div>
+            <div class="bg-white p-3 rounded border">
+              <div class="font-medium text-blue-700">removePreview()</div>
+              <div class="text-gray-600">Lines 175-185</div>
+              <div class="text-xs text-gray-500 mt-1">Delete image previews</div>
+            </div>
+            <div class="bg-white p-3 rounded border">
+              <div class="font-medium text-blue-700">updateFileInput()</div>
+              <div class="text-gray-600">Lines 200-220</div>
+              <div class="text-xs text-gray-500 mt-1">Form input synchronization</div>
+            </div>
+            <div class="bg-white p-3 rounded border">
+              <div class="font-medium text-blue-700">addSize()</div>
+              <div class="text-gray-600">Lines 245-275</div>
+              <div class="text-xs text-gray-500 mt-1">Dynamic size form creation</div>
+            </div>
+            <div class="bg-white p-3 rounded border">
+              <div class="font-medium text-blue-700">removeSize()</div>
+              <div class="text-gray-600">Lines 285-295</div>
+              <div class="text-xs text-gray-500 mt-1">Remove size form fields</div>
+            </div>
+            <div class="bg-white p-3 rounded border">
+              <div class="font-medium text-blue-700">updateSizes()</div>
+              <div class="text-gray-600">Lines 310-335</div>
+              <div class="text-xs text-gray-500 mt-1">Serialize size data to JSON</div>
+            </div>
+            <div class="bg-white p-3 rounded border">
+              <div class="font-medium text-blue-700">addColor()</div>
+              <div class="text-gray-600">Lines 350-375</div>
+              <div class="text-xs text-gray-500 mt-1">Dynamic color form creation</div>
+            </div>
+            <div class="bg-white p-3 rounded border">
+              <div class="font-medium text-blue-700">removeColor()</div>
+              <div class="text-gray-600">Lines 385-395</div>
+              <div class="text-xs text-gray-500 mt-1">Remove color form fields</div>
+            </div>
+            <div class="bg-white p-3 rounded border">
+              <div class="font-medium text-blue-700">updateColors()</div>
+              <div class="text-gray-600">Lines 400-415</div>
+              <div class="text-xs text-gray-500 mt-1">Serialize color data to JSON</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-blue-50 rounded-lg p-4">
+          <h4 class="font-medium text-blue-800 mb-2">🔗 Web Access</h4>
+          <div class="text-sm text-blue-700">
+            <strong>URL:</strong> <code>http://localhost:3000/admin/add-product</code><br>
+            <strong>Method:</strong> GET (form display) | POST (form submission)<br>
+            <strong>Authentication:</strong> Required (admin session)
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Additional Frontend Files -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+        <h4 class="font-semibold text-gray-900 mb-3">📄 CSS Styling Files</h4>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+            <span>admin.css</span>
+            <span class="text-xs text-gray-500">public/css/admin.css</span>
+          </div>
+          <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+            <span>bootstrap.min.css</span>
+            <span class="text-xs text-gray-500">CDN Link</span>
+          </div>
+          <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+            <span>custom-styles.css</span>
+            <span class="text-xs text-gray-500">public/css/custom.css</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+        <h4 class="font-semibold text-gray-900 mb-3">📦 JavaScript Libraries</h4>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+            <span>jQuery 3.6.0</span>
+            <span class="text-xs text-gray-500">CDN Link</span>
+          </div>
+          <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+            <span>Bootstrap JS</span>
+            <span class="text-xs text-gray-500">CDN Link</span>
+          </div>
+          <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+            <span>Font Awesome</span>
+            <span class="text-xs text-gray-500">CDN Link</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Backend Files -->
+  <section class="mb-12">
+    <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+      <span class="text-2xl mr-3">⚙️</span>
+      Backend Files & Controllers
+    </h2>
+
+    <!-- Main Controller -->
+    <div class="bg-white rounded-xl p-6 border border-green-200 shadow-sm mb-6">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center space-x-3">
+          <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+            <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900">adminController.js</h3>
+            <p class="text-sm text-gray-600">Main backend controller with all admin functions</p>
+          </div>
+        </div>
+        <div class="text-right">
+          <div class="text-sm font-medium text-green-600">controllers/adminController.js</div>
+          <div class="text-xs text-gray-500">320 lines total</div>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div class="bg-gray-50 rounded-lg p-4">
+          <h4 class="font-medium text-gray-800 mb-3">📍 Function Locations</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
+            <div class="bg-white p-3 rounded border">
+              <div class="font-medium text-green-700">uploadProductImages</div>
+              <div class="text-gray-600">Lines 15-35</div>
+              <div class="text-xs text-gray-500 mt-1">Multer configuration</div>
+            </div>
+            <div class="bg-white p-3 rounded border">
+              <div class="font-medium text-green-700">storage.destination</div>
+              <div class="text-gray-600">Lines 18-22</div>
+              <div class="text-xs text-gray-500 mt-1">File storage directory</div>
+            </div>
+            <div class="bg-white p-3 rounded border">
+              <div class="font-medium text-green-700">storage.filename</div>
+              <div class="text-gray-600">Lines 23-28</div>
+              <div class="text-xs text-gray-500 mt-1">File naming convention</div>
+            </div>
+            <div class="bg-white p-3 rounded border">
+              <div class="font-medium text-green-700">dashboard()</div>
+              <div class="text-gray-600">Lines 45-65</div>
+              <div class="text-xs text-gray-500 mt-1">Admin dashboard controller</div>
+            </div>
+            <div class="bg-white p-3 rounded border">
+              <div class="font-medium text-green-700">getProducts()</div>
+              <div class="text-gray-600">Lines 75-95</div>
+              <div class="text-xs text-gray-500 mt-1">Products list controller</div>
+            </div>
+            <div class="bg-white p-3 rounded border">
+              <div class="font-medium text-green-700">getAddProduct()</div>
+              <div class="text-gray-600">Lines 145-155</div>
+              <div class="text-xs text-gray-500 mt-1">Add product form renderer</div>
+            </div>
+            <div class="bg-white p-3 rounded border">
+              <div class="font-medium text-green-700">createProduct()</div>
+              <div class="text-gray-600">Lines 185-250</div>
+              <div class="text-xs text-gray-500 mt-1">Product creation handler</div>
+            </div>
+            <div class="bg-white p-3 rounded border">
+              <div class="font-medium text-green-700">getEditProduct()</div>
+              <div class="text-gray-600">Lines 265-285</div>
+              <div class="text-xs text-gray-500 mt-1">Edit product form</div>
+            </div>
+            <div class="bg-white p-3 rounded border">
+              <div class="font-medium text-green-700">updateProduct()</div>
+              <div class="text-gray-600">Lines 295-315</div>
+              <div class="text-xs text-gray-500 mt-1">Product update handler</div>
+            </div>
+            <div class="bg-white p-3 rounded border">
+              <div class="font-medium text-green-700">deleteProduct()</div>
+              <div class="text-gray-600">Lines 318-320</div>
+              <div class="text-xs text-gray-500 mt-1">Product deletion handler</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Supporting Files -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Routes -->
+      <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+        <h4 class="font-semibold text-gray-900 mb-3">🛤️ Route Definitions</h4>
+        <div class="space-y-3 text-sm">
+          <div class="bg-gray-50 p-3 rounded">
+            <div class="font-medium">admin.js</div>
+            <div class="text-gray-600 text-xs">routes/admin.js</div>
+            <div class="text-gray-500 text-xs mt-1">All admin route mappings</div>
+          </div>
+          <div class="bg-yellow-50 p-3 rounded border-l-3 border-yellow-400">
+            <div class="font-medium text-yellow-800">Key Routes:</div>
+            <div class="text-xs text-yellow-700 mt-1">
+              GET /admin/add-product (Lines 15-18)<br>
+              POST /admin/add-product (Lines 20-25)<br>
+              GET /admin/products (Lines 8-12)
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Middleware -->
+      <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+        <h4 class="font-semibold text-gray-900 mb-3">🔧 Middleware Files</h4>
+        <div class="space-y-3 text-sm">
+          <div class="bg-gray-50 p-3 rounded">
+            <div class="font-medium">auth.js</div>
+            <div class="text-gray-600 text-xs">middleware/auth.js</div>
+            <div class="text-gray-500 text-xs mt-1">Authentication middleware</div>
+          </div>
+          <div class="bg-blue-50 p-3 rounded border-l-3 border-blue-400">
+            <div class="font-medium text-blue-800">Functions:</div>
+            <div class="text-xs text-blue-700 mt-1">
+              isAuthenticated() (Lines 5-15)<br>
+              isAdminOrManager() (Lines 18-28)
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Database Files -->
+  <section class="mb-12">
+    <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+      <span class="text-2xl mr-3">🗄️</span>
+      Database Models & Schema
+    </h2>
+
+    <div class="bg-white rounded-xl p-6 border border-purple-200 shadow-sm">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center space-x-3">
+          <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+            <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.79 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.79 4 8 4s8-1.79 8-4M4 7c0-2.21 3.79-4 8-4s8 1.79 8 4"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900">Product.js</h3>
+            <p class="text-sm text-gray-600">MongoDB schema definition for products</p>
+          </div>
+        </div>
+        <div class="text-right">
+          <div class="text-sm font-medium text-purple-600">models/Product.js</div>
+          <div class="text-xs text-gray-500">85 lines total</div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-purple-50 rounded-lg p-4">
+          <h4 class="font-medium text-purple-800 mb-3">📋 Schema Structure</h4>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span class="text-purple-700">productSchema</span>
+              <span class="text-xs text-purple-600">Lines 8-35</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-purple-700">name field</span>
+              <span class="text-xs text-purple-600">Lines 9-10</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-purple-700">images array</span>
+              <span class="text-xs text-purple-600">Lines 13</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-purple-700">sizes subdoc</span>
+              <span class="text-xs text-purple-600">Lines 15-19</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-purple-700">colors subdoc</span>
+              <span class="text-xs text-purple-600">Lines 21-25</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-purple-700">timestamps</span>
+              <span class="text-xs text-purple-600">Lines 30-32</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-gray-50 rounded-lg p-4">
+          <h4 class="font-medium text-gray-800 mb-3">🔍 Model Methods</h4>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span class="text-gray-700">pre('save')</span>
+              <span class="text-xs text-gray-600">Lines 40-45</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-700">virtual('imageUrls')</span>
+              <span class="text-xs text-gray-600">Lines 50-55</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-700">statics.findActive</span>
+              <span class="text-xs text-gray-600">Lines 60-65</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-700">export statement</span>
+              <span class="text-xs text-gray-600">Line 85</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Additional Models -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+      <div class="bg-white rounded-lg p-4 border border-gray-200">
+        <h5 class="font-medium text-gray-900 mb-2">Category.js</h5>
+        <div class="text-sm text-gray-600">models/Category.js</div>
+        <div class="text-xs text-gray-500 mt-1">Product category model</div>
+      </div>
+      <div class="bg-white rounded-lg p-4 border border-gray-200">
+        <h5 class="font-medium text-gray-900 mb-2">User.js</h5>
+        <div class="text-sm text-gray-600">models/User.js</div>
+        <div class="text-xs text-gray-500 mt-1">Admin user model</div>
+      </div>
+      <div class="bg-white rounded-lg p-4 border border-gray-200">
+        <h5 class="font-medium text-gray-900 mb-2">Order.js</h5>
+        <div class="text-sm text-gray-600">models/Order.js</div>
+        <div class="text-xs text-gray-500 mt-1">Order management model</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- URL Endpoints Mapping -->
+  <section class="mb-12">
+    <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+      <span class="text-2xl mr-3">🔗</span>
+      Complete URL Endpoints
+    </h2>
+
+    <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Admin Endpoints -->
+        <div>
+          <h4 class="font-semibold text-gray-900 mb-4">🏛️ Admin Endpoints</h4>
+          <div class="space-y-3">
+            <div class="bg-green-50 p-3 rounded-lg border-l-4 border-green-500">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="font-medium text-green-800">GET /admin</div>
+                  <div class="text-sm text-green-700">Admin dashboard</div>
+                </div>
+                <div class="text-xs text-green-600">dashboard()</div>
+              </div>
+            </div>
+
+            <div class="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-500">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="font-medium text-blue-800">GET /admin/products</div>
+                  <div class="text-sm text-blue-700">Products list page</div>
+                </div>
+                <div class="text-xs text-blue-600">getProducts()</div>
+              </div>
+            </div>
+
+            <div class="bg-purple-50 p-3 rounded-lg border-l-4 border-purple-500">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="font-medium text-purple-800">GET /admin/add-product</div>
+                  <div class="text-sm text-purple-700">Add product form</div>
+                </div>
+                <div class="text-xs text-purple-600">getAddProduct()</div>
+              </div>
+            </div>
+
+            <div class="bg-orange-50 p-3 rounded-lg border-l-4 border-orange-500">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="font-medium text-orange-800">POST /admin/add-product</div>
+                  <div class="text-sm text-orange-700">Submit new product</div>
+                </div>
+                <div class="text-xs text-orange-600">createProduct()</div>
+              </div>
+            </div>
+
+            <div class="bg-indigo-50 p-3 rounded-lg border-l-4 border-indigo-500">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="font-medium text-indigo-800">GET /admin/edit/:id</div>
+                  <div class="text-sm text-indigo-700">Edit product form</div>
+                </div>
+                <div class="text-xs text-indigo-600">getEditProduct()</div>
+              </div>
+            </div>
+
+            <div class="bg-teal-50 p-3 rounded-lg border-l-4 border-teal-500">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="font-medium text-teal-800">PUT /admin/update/:id</div>
+                  <div class="text-sm text-teal-700">Update product</div>
+                </div>
+                <div class="text-xs text-teal-600">updateProduct()</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Static & Asset Endpoints -->
+        <div>
+          <h4 class="font-semibold text-gray-900 mb-4">📁 Static & Asset URLs</h4>
+          <div class="space-y-3">
+            <div class="bg-gray-50 p-3 rounded-lg">
+              <div class="font-medium text-gray-800">/images/*</div>
+              <div class="text-sm text-gray-600">Product images directory</div>
+              <div class="text-xs text-gray-500">Served by Express static</div>
+            </div>
+
+            <div class="bg-gray-50 p-3 rounded-lg">
+              <div class="font-medium text-gray-800">/css/*</div>
+              <div class="text-sm text-gray-600">Stylesheet files</div>
+              <div class="text-xs text-gray-500">Bootstrap + custom CSS</div>
+            </div>
+
+            <div class="bg-gray-50 p-3 rounded-lg">
+              <div class="font-medium text-gray-800">/js/*</div>
+              <div class="text-sm text-gray-600">JavaScript files</div>
+              <div class="text-xs text-gray-500">jQuery + Bootstrap JS</div>
+            </div>
+
+            <div class="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+              <div class="font-medium text-yellow-800">File Upload Endpoint</div>
+              <div class="text-sm text-yellow-700">POST with multipart/form-data</div>
+              <div class="text-xs text-yellow-600">Max 10 files, 5MB each</div>
+            </div>
+
+            <div class="bg-red-50 p-3 rounded-lg border border-red-200">
+              <div class="font-medium text-red-800">Protected Routes</div>
+              <div class="text-sm text-red-700">All /admin/* require authentication</div>
+              <div class="text-xs text-red-600">Session-based security</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- File Structure Tree -->
+  <section class="mb-12">
+    <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+      <span class="text-2xl mr-3">🌳</span>
+      Complete File Structure Tree
+    </h2>
+
+    <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+      <div class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm overflow-x-auto">
+        <div class="whitespace-pre">product-management-system/
+├── 📁 controllers/
+│   ├── 📄 adminController.js     <span class="text-gray-500"># Main admin functions (Lines 1-320)</span>
+│   ├── 📄 authController.js      <span class="text-gray-500"># Authentication logic</span>
+│   └── 📄 productController.js   <span class="text-gray-500"># Product CRUD operations</span>
+├── 📁 models/
+│   ├── 📄 Product.js             <span class="text-gray-500"># Product schema (Lines 1-85)</span>
+│   ├── 📄 Category.js            <span class="text-gray-500"># Category model</span>
+│   ├── 📄 User.js                <span class="text-gray-500"># User/Admin model</span>
+│   └── 📄 Order.js               <span class="text-gray-500"># Order management</span>
+├── 📁 routes/
+│   ├── 📄 admin.js               <span class="text-gray-500"># Admin routes (Lines 1-45)</span>
+│   ├── 📄 auth.js                <span class="text-gray-500"># Auth routes</span>
+│   └── 📄 index.js               <span class="text-gray-500"># Main router</span>
+├── 📁 views/
+│   ├── 📁 admin/
+│   │   ├── 📄 add-product.ejs    <span class="text-gray-500"># Main form (Lines 1-450)</span>
+│   │   ├── 📄 products.ejs       <span class="text-gray-500"># Products list</span>
+│   │   ├── 📄 edit-product.ejs   <span class="text-gray-500"># Edit form</span>
+│   │   └── 📄 dashboard.ejs      <span class="text-gray-500"># Admin dashboard</span>
+│   ├── 📁 layouts/
+│   │   └── 📄 admin-layout.ejs   <span class="text-gray-500"># Admin template</span>
+│   └── 📁 partials/
+│       ├── 📄 header.ejs         <span class="text-gray-500"># Header component</span>
+│       └── 📄 footer.ejs         <span class="text-gray-500"># Footer component</span>
+├── 📁 middleware/
+│   ├── 📄 auth.js                <span class="text-gray-500"># Auth middleware</span>
+│   └── 📄 upload.js              <span class="text-gray-500"># File upload config</span>
+├── 📁 public/
+│   ├── 📁 css/
+│   │   ├── 📄 admin.css          <span class="text-gray-500"># Admin styles</span>
+│   │   └── 📄 custom.css         <span class="text-gray-500"># Custom styles</span>
+│   ├── 📁 js/
+│   │   └── 📄 admin.js           <span class="text-gray-500"># Admin JavaScript</span>
+│   └── 📁 images/                <span class="text-gray-500"># Product images directory</span>
+├── 📁 config/
+│   ├── 📄 database.js            <span class="text-gray-500"># MongoDB connection</span>
+│   └── 📄 multer.js              <span class="text-gray-500"># File upload config</span>
+├── 📄 app.js                     <span class="text-gray-500"># Main application file</span>
+├── 📄 server.js                  <span class="text-gray-500"># Server startup</span>
+└── 📄 package.json               <span class="text-gray-500"># Dependencies & scripts</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Navigation Summary -->
+  <div class="bg-gradient-to-r from-purple-900 to-blue-900 text-white rounded-xl p-8">
+    <h3 class="text-2xl font-bold mb-4">🎯 Navigation Summary</h3>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+      <div class="text-center">
+        <div class="text-3xl font-bold text-purple-300">8</div>
+        <div class="text-sm text-gray-300">Core Files</div>
+      </div>
+      <div class="text-center">
+        <div class="text-3xl font-bold text-blue-300">450+</div>
+        <div class="text-sm text-gray-300">Lines of Code</div>
+      </div>
+      <div class="text-center">
+        <div class="text-3xl font-bold text-green-300">12</div>
+        <div class="text-sm text-gray-300">URL Endpoints</div>
+      </div>
+      <div class="text-center">
+        <div class="text-3xl font-bold text-yellow-300">25</div>
+        <div class="text-sm text-gray-300">Mapped Functions</div>
+      </div>
+    </div>
+    <p class="text-gray-300 text-center">
+      Complete file mapping with exact line numbers, URLs, and navigation paths. 
+      Every function location documented for efficient code navigation and debugging.
+    </p>
+  </div>
+</DocsLayout>

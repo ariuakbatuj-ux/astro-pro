@@ -1,0 +1,44 @@
+---
+import BaseHead from '../components/common/BaseHead.astro';
+import Header from '../components/common/Header.astro';
+import Footer from '../components/common/Footer.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <BaseHead title={title} description={description || 'Shop the best products online'} />
+  </head>
+  <body class="bg-gray-50">
+    <Header />
+    
+    <main class="min-h-screen">
+      <slot />
+    </main>
+    
+    <Footer />
+    
+    <!-- Cart Sidebar (can be added later) -->
+    <div id="cartSidebar" class="hidden fixed right-0 top-0 h-full w-80 bg-white shadow-2xl z-50">
+      <!-- Cart content -->
+    </div>
+  </body>
+</html>
+
+<style is:global>
+  /* Custom shop styles */
+  .product-card {
+    transition: transform 0.2s;
+  }
+  
+  .product-card:hover {
+    transform: translateY(-4px);
+  }
+</style>

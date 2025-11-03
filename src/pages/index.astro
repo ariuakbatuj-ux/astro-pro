@@ -1,0 +1,82 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="ShopHub - Online Shopping Platform" description="Welcome to ShopHub, your online shopping destination">
+  <div class="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center px-4">
+    <div class="max-w-4xl w-full">
+      <!-- Hero Section -->
+      <div class="text-center mb-12">
+        <h1 class="text-6xl font-bold text-orange-600 mb-4">ShopHub</h1>
+        <p class="text-2xl text-gray-700 mb-8">Your Ultimate Shopping Destination</p>
+        <p class="text-lg text-gray-600 mb-12 max-w-2xl mx-auto">
+          Discover amazing products, add them to your cart, and enjoy a seamless shopping experience. 
+          Sign up today and start shopping!
+        </p>
+        
+        <!-- CTA Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+          <a href="/auth/signin" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-orange-600 hover:bg-orange-700 rounded-lg transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+            </svg>
+            Sign In
+          </a>
+          <a href="/auth/signup" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-orange-600 bg-white hover:bg-orange-50 rounded-lg border-2 border-orange-600 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+            </svg>
+            Create Account
+          </a>
+        </div>
+      </div>
+
+      <!-- Features Grid -->
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+        <div class="bg-white rounded-xl shadow-lg p-8 text-center transform hover:-translate-y-2 transition-transform">
+          <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">Browse Products</h3>
+          <p class="text-gray-600">Explore our wide selection of quality products with detailed descriptions and images.</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-8 text-center transform hover:-translate-y-2 transition-transform">
+          <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m1.6 8L5 3H3m4 10v6a1 1 0 001 1h10a1 1 0 001-1v-6m-6 4h2m-2-2h2m-2-2h2"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">Add to Cart</h3>
+          <p class="text-gray-600">Easily add items to your cart and manage quantities before checkout.</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-8 text-center transform hover:-translate-y-2 transition-transform">
+          <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">Secure Checkout</h3>
+          <p class="text-gray-600">Complete your purchase safely with our secure payment system.</p>
+        </div>
+      </div>
+
+      <!-- Admin Access Info -->
+      <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 text-center">
+        <h3 class="text-lg font-semibold text-blue-900 mb-2">Admin Access</h3>
+        <p class="text-blue-700 mb-4">
+          <strong>Email:</strong> admin@gmail.com • <strong>Password:</strong> admin123
+        </p>
+        <a href="/auth/signin?demo=admin" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium">
+          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+          </svg>
+          Quick Admin Login
+        </a>
+      </div>
+    </div>
+  </div>
+</Layout>

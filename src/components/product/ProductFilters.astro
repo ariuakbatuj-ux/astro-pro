@@ -1,0 +1,128 @@
+---
+interface Category {
+  _id: number;
+  name: string;
+  slug: string;
+}
+
+interface Props {
+  categories: Category[];
+  currentCategory?: string;
+  currentPriceRange?: string;
+  currentSort?: string;
+}
+
+const { categories, currentCategory, currentPriceRange, currentSort } = Astro.props;
+---
+
+<div class="bg-white rounded-lg shadow-sm p-6 sticky top-24">
+  <h3 class="font-semibold text-lg mb-4">Filters</h3>
+  
+  <!-- Search -->
+  <div class="mb-6">
+    <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-2">
+      Search Products
+    </label>
+    <input
+      type="text"
+      id="searchInput"
+      placeholder="Search..."
+      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+    />
+  </div>
+
+  <!-- Categories -->
+  <div class="mb-6">
+    <label for="categorySelect" class="block text-sm font-medium text-gray-700 mb-2">
+      Category
+    </label>
+    <select
+      id="categorySelect"
+      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+    >
+      <option value="">All Categories</option>
+      {categories.map(cat => (
+        <option value={cat._id} selected={currentCategory === cat._id.toString()}>
+          {cat.name}
+        </option>
+      ))}
+    </select>
+  </div>
+
+  <!-- Price Range -->
+  <div class="mb-6">
+    <label for="priceSelect" class="block text-sm font-medium text-gray-700 mb-2">
+      Price Range
+    </label>
+    <select
+      id="priceSelect"
+      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+    >
+      <option value="">All Prices</option>
+      <option value="0-25" selected={currentPriceRange === '0-25'}>Under $25</option>
+      <option value="25-50" selected={currentPriceRange === '25-50'}>$25 - $50</option>
+      <option value="50-100" selected={currentPriceRange === '50-100'}>$50 - $100</option>
+      <option value="100+" selected={currentPriceRange === '100+'}>$100+</option>
+    </select>
+  </div>
+
+  <!-- Sort -->
+  <div class="mb-6">
+    <label for="sortSelect" class="block text-sm font-medium text-gray-700 mb-2">
+      Sort By
+    </label>
+    <select
+      id="sortSelect"
+      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+    >
+      <option value="default" selected={!currentSort || currentSort === 'default'}>Default</option>
+      <option value="price-asc" selected={currentSort === 'price-asc'}>Price: Low to High</option>
+      <option value="price-desc" selected={currentSort === 'price-desc'}>Price: High to Low</option>
+      <option value="name-asc" selected={currentSort === 'name-asc'}>Name: A-Z</option>
+      <option value="name-desc" selected={currentSort === 'name-desc'}>Name: Z-A</option>
+    </select>
+  </div>
+
+  <!-- Reset Button -->
+  <button
+    id="resetFilters"
+    class="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+  >
+    Reset Filters
+  </button>
+</div>
+
+<script>
+  // Filter functionality will be implemented in shop.astro
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('searchInput') as HTMLInputElement;
+    const categorySelect = document.getElementById('categorySelect') as HTMLSelectElement;
+    const priceSelect = document.getElementById('priceSelect') as HTMLSelectElement;
+    const sortSelect = document.getElementById('sortSelect') as HTMLSelectElement;
+    const resetButton = document.getElementById('resetFilters') as HTMLButtonElement;
+
+    function applyFilters() {
+      window.dispatchEvent(new CustomEvent('filtersChanged', {
+        detail: {
+          search: searchInput.value,
+          category: categorySelect.value,
+          priceRange: priceSelect.value,
+          sort: sortSelect.value
+        }
+      }));
+    }
+
+    searchInput?.addEventListener('input', applyFilters);
+    categorySelect?.addEventListener('change', applyFilters);
+    priceSelect?.addEventListener('change', applyFilters);
+    sortSelect?.addEventListener('change', applyFilters);
+
+    resetButton?.addEventListener('click', () => {
+      searchInput.value = '';
+      categorySelect.value = '';
+      priceSelect.value = '';
+      sortSelect.value = 'default';
+      applyFilters();
+    });
+  });
+</script>

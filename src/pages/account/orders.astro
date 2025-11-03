@@ -1,0 +1,297 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { verifyToken } from '../../lib/auth';
+import { supabase } from '../../lib/supabase';
+
+// Check authentication
+const token = Astro.cookies.get('token')?.value;
+const user = token ? verifyToken(token) : null;
+
+if (!user) {
+  return Astro.redirect('/auth/signin');
+}
+
+const userId = user.userId;
+
+// Fetch orders from database
+const { data: ordersData, error } = await supabase
+  .from('orders')
+  .select(`
+    _id,
+    order_number,
+    total_amount,
+    status,
+    payment_method,
+    payment_status,
+    shipping_address,
+    created_at,
+    updated_at
+  `)
+  .eq('user_id', userId)
+  .order('created_at', { ascending: false });
+
+console.log('Orders fetched:', ordersData, 'Error:', error);
+
+// Transform orders data
+const orders = ordersData?.map(order => ({
+  id: order._id,
+  orderNumber: order.order_number,
+  totalAmount: order.total_amount,
+  status: order.status,
+  paymentMethod: order.payment_method,
+  paymentStatus: order.payment_status,
+  shippingAddress: order.shipping_address,
+  createdAt: order.created_at,
+  formattedDate: new Date(order.created_at).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+})) || [];
+
+// Helper function to get status badge color
+const getStatusBadge = (status: string) => {
+  const badges: Record<string, { bg: string; text: string; label: string }> = {
+    'pending': { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Pending' },
+    'processing': { bg: 'bg-blue-100', text: 'text-blue-800', label: 'Processing' },
+    'shipped': { bg: 'bg-purple-100', text: 'text-purple-800', label: 'Shipped' },
+    'delivered': { bg: 'bg-green-100', text: 'text-green-800', label: 'Delivered' },
+    'cancelled': { bg: 'bg-red-100', text: 'text-red-800', label: 'Cancelled' }
+  };
+  return badges[status] || badges['pending'];
+};
+---
+
+<Layout title="My Orders - ShopHub" description="Track and manage your orders">
+  <div class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center space-x-4">
+            <a href="/shop" class="text-xl font-bold text-orange-600">ShopHub</a>
+            <nav class="hidden md:flex space-x-6">
+              <a href="/shop" class="text-gray-700 hover:text-orange-600 transition-colors">Shop</a>
+              <a href="/account/orders" class="text-orange-600 font-medium">My Orders</a>
+              <a href="/account/profile" class="text-gray-700 hover:text-orange-600 transition-colors">Profile</a>
+            </nav>
+          </div>
+          <div class="flex items-center space-x-4">
+            <button onclick="logout()" class="text-gray-700 hover:text-red-600 transition-colors">Logout</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Page Header -->
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">My Orders</h1>
+        <p class="text-gray-600 mt-2">Track and manage all your purchases</p>
+      </div>
+
+      <!-- Filters -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+          <div class="flex space-x-4">
+            <select id="statusFilter" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+              <option value="">All Orders</option>
+              <option value="pending">Pending</option>
+              <option value="processing">Processing</option>
+              <option value="shipped">Shipped</option>
+              <option value="delivered">Delivered</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+            
+            <select id="timeFilter" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+              <option value="">All Time</option>
+              <option value="30">Last 30 days</option>
+              <option value="90">Last 3 months</option>
+              <option value="365">Last year</option>
+            </select>
+          </div>
+          
+          <div class="flex items-center space-x-4">
+            <input type="text" id="searchOrders" placeholder="Search orders..." class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+            <button onclick="clearFilters()" class="text-orange-600 hover:text-orange-700 font-medium">Clear Filters</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Orders List -->
+      <div id="ordersList" class="space-y-6">
+        {orders.length === 0 ? (
+          <div class="text-center py-12">
+            <div class="w-24 h-24 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
+              <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+              </svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No orders yet</h3>
+            <p class="text-gray-600 mb-6">You haven't placed any orders. Start shopping to see your order history here!</p>
+            <a href="/shop" class="inline-block bg-orange-500 text-white px-6 py-3 rounded-md hover:bg-orange-600 transition-colors">
+              Start Shopping
+            </a>
+          </div>
+        ) : (
+          orders.map(order => {
+            const statusBadge = getStatusBadge(order.status);
+            return (
+              <div class="order-item bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden" data-status={order.status} data-date={order.createdAt}>
+                <div class="p-6">
+                  <div class="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 class="text-lg font-semibold text-gray-900">Order #{order.orderNumber}</h3>
+                      <p class="text-sm text-gray-600">Placed on {order.formattedDate}</p>
+                    </div>
+                    <div class="text-right">
+                      <p class="text-lg font-bold text-gray-900">${order.totalAmount.toFixed(2)}</p>
+                      <span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusBadge.bg} ${statusBadge.text}`}>
+                        {statusBadge.label}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {/* Shipping Address */}
+                  {order.shippingAddress && (
+                    <div class="mb-4 p-4 bg-gray-50 rounded-lg">
+                      <h4 class="text-sm font-medium text-gray-700 mb-1">Shipping Address</h4>
+                      <p class="text-sm text-gray-600">{order.shippingAddress}</p>
+                    </div>
+                  )}
+                  
+                  {/* Payment Info */}
+                  {order.paymentMethod && (
+                    <div class="mb-4 p-4 bg-gray-50 rounded-lg">
+                      <h4 class="text-sm font-medium text-gray-700 mb-1">Payment Method</h4>
+                      <p class="text-sm text-gray-600 capitalize">{order.paymentMethod}</p>
+                      {order.paymentStatus && (
+                        <p class="text-xs text-gray-500 mt-1">Status: <span class="capitalize">{order.paymentStatus}</span></p>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Order Actions */}
+                  <div class="border-t border-gray-200 pt-4">
+                    <div class="flex items-center justify-between">
+                      <div class="text-sm text-gray-600">
+                        <span class="font-medium">Order ID:</span> {order.id}
+                      </div>
+                      <div class="flex space-x-4">
+                        <button onclick={`viewOrderDetails('${order.orderNumber}')`} class="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 transition-colors text-sm">
+                          View Details
+                        </button>
+                        {order.status === 'pending' || order.status === 'processing' ? (
+                          <button onclick={`cancelOrder('${order.orderNumber}')`} class="border border-red-500 text-red-600 px-4 py-2 rounded-md hover:bg-red-50 transition-colors text-sm">
+                            Cancel Order
+                          </button>
+                        ) : order.status === 'delivered' ? (
+                          <button onclick={`reorderItems('${order.orderNumber}')`} class="border border-orange-500 text-orange-600 px-4 py-2 rounded-md hover:bg-orange-50 transition-colors text-sm">
+                            Reorder
+                          </button>
+                        ) : null}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+    </div>
+  </div>
+
+  <script define:vars={{ orders }}>
+    // Filter orders
+    function filterOrders() {
+      const statusFilter = document.getElementById('statusFilter').value;
+      const timeFilter = document.getElementById('timeFilter').value;
+      const searchQuery = document.getElementById('searchOrders').value.toLowerCase();
+      const orderElements = document.querySelectorAll('.order-item');
+      let visibleOrders = 0;
+
+      orderElements.forEach(function(order) {
+        let visible = true;
+        
+        // Status filter
+        if (statusFilter && order.dataset.status !== statusFilter) {
+          visible = false;
+        }
+        
+        // Time filter
+        if (timeFilter && visible) {
+          const orderDate = new Date(order.dataset.date);
+          const daysDiff = (new Date() - orderDate) / (1000 * 60 * 60 * 24);
+          if (daysDiff > parseInt(timeFilter)) {
+            visible = false;
+          }
+        }
+        
+        // Search filter
+        if (searchQuery && visible) {
+          const orderText = order.textContent.toLowerCase();
+          if (!orderText.includes(searchQuery)) {
+            visible = false;
+          }
+        }
+        
+        if (visible) {
+          order.style.display = 'block';
+          visibleOrders++;
+        } else {
+          order.style.display = 'none';
+        }
+      });
+    }
+
+    function clearFilters() {
+      document.getElementById('statusFilter').value = '';
+      document.getElementById('timeFilter').value = '';
+      document.getElementById('searchOrders').value = '';
+      filterOrders();
+    }
+
+    function viewOrderDetails(orderId) {
+      alert('Viewing details for Order #' + orderId + '. This feature will show detailed order information.');
+    }
+
+    function trackPackage(orderId) {
+      alert('Opening tracking for Order #' + orderId + '. This will show package tracking information.');
+    }
+
+    function reorderItems(orderId) {
+      if (confirm('Add all items from Order #' + orderId + ' to your cart?')) {
+        alert('Items added to cart!');
+      }
+    }
+
+    function cancelOrder(orderId) {
+      if (confirm('Are you sure you want to cancel Order #' + orderId + '?')) {
+        alert('Order cancellation request submitted. You will receive a confirmation email.');
+      }
+    }
+
+    function modifyOrder(orderId) {
+      alert('Opening modification options for Order #' + orderId);
+    }
+
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        document.cookie = 'token=; path=/; max-age=0';
+        window.location.href = '/auth/signin';
+      }
+    }
+
+    // Add event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+      const statusFilter = document.getElementById('statusFilter');
+      const timeFilter = document.getElementById('timeFilter');
+      const searchInput = document.getElementById('searchOrders');
+      
+      if (statusFilter) statusFilter.addEventListener('change', filterOrders);
+      if (timeFilter) timeFilter.addEventListener('change', filterOrders);
+      if (searchInput) searchInput.addEventListener('input', filterOrders);
+    });
+  </script>
+</Layout>

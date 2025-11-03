@@ -1,0 +1,141 @@
+---
+// Test authentication and redirect to profile page
+import { supabase } from '../../lib/supabase';
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = import.meta.env.JWT_SECRET || "your-secret-key-change-this-in-production";
+
+// Get test user (user 3 - ariuka who has wishlist items)
+const { data: userData, error: userError } = await supabase
+  .from('users')
+  .select('_id, username, email, role')
+  .eq('_id', 3)
+  .single();
+
+let testToken = '';
+let debugInfo = {};
+
+if (userData && !userError) {
+  // Create JWT token exactly like the signin API
+  testToken = jwt.sign(
+    { 
+      userId: userData._id,
+      email: userData.email,
+      username: userData.username,
+      role: userData.role
+    },
+    JWT_SECRET,
+    { expiresIn: "7d" }
+  );
+
+  // Set the cookie using redirect like the signin page does
+  return Astro.redirect(`/test/auth-success?token=${testToken}`);
+
+  debugInfo = {
+    user: userData,
+    tokenCreated: true,
+    cookieSet: true
+  };
+}
+---
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Auth Test - ShopHub</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      max-width: 600px; 
+      margin: 50px auto; 
+      padding: 20px;
+      background-color: #f9f9f9;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .success { color: #22c55e; }
+    .info { color: #3b82f6; }
+    .debug { 
+      background: #f3f4f6; 
+      padding: 15px; 
+      border-radius: 6px; 
+      margin: 15px 0;
+      font-size: 14px;
+    }
+    button {
+      background: #f97316;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px 5px 10px 0;
+    }
+    button:hover { background: #ea580c; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 Authentication Test</h1>
+    
+    {userData ? (
+      <div>
+        <p class="success">✅ Successfully authenticated as: <strong>{userData.username}</strong></p>
+        <p class="info">📧 Email: {userData.email}</p>
+        <p class="info">🆔 User ID: {userData._id}</p>
+        <p class="info">🔑 JWT Token created and cookie set</p>
+        
+        <div class="debug">
+          <strong>Debug Info:</strong>
+          <pre>{JSON.stringify(debugInfo, null, 2)}</pre>
+        </div>
+
+        <div>
+          <button onclick="window.location.href='/shop/profile'">
+            📋 Go to Profile & Check Wishlist
+          </button>
+          <button onclick="window.location.href='/shop'">
+            🛒 Go to Shop
+          </button>
+        </div>
+
+        <div style="margin-top: 20px; padding: 15px; background: #fef3c7; border-radius: 6px;">
+          <strong>🎯 Expected Result:</strong>
+          <p>User 3 (ariuka) should have <strong>3 items</strong> in wishlist:</p>
+          <ul>
+            <li>Product ID 1</li>
+            <li>Product ID 2</li> 
+            <li>Product ID 3</li>
+          </ul>
+        </div>
+      </div>
+    ) : (
+      <div>
+        <p style="color: #ef4444;">❌ Test user not found</p>
+        <p>Error: {userError?.message}</p>
+      </div>
+    )}
+  </div>
+
+  <script is:inline>
+    // Log token info for debugging
+    console.log('🔍 Auth Test Debug:');
+    console.log('Cookie set:', document.cookie.includes('token='));
+    console.log('All cookies:', document.cookie);
+    
+    // Auto-redirect after 3 seconds if successful
+    const hasUser = `{userData ? 'true' : 'false'}` === 'true';
+    if (hasUser) {
+      console.log('✅ Auto-redirecting to profile in 3 seconds...');
+      setTimeout(() => {
+        window.location.href = '/shop/profile';
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

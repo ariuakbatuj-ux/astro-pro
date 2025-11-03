@@ -1,0 +1,60 @@
+---
+import ProductCard from './ProductCard.astro';
+
+interface Product {
+  _id: number;
+  name: string;
+  price: number;
+  images?: string[];
+  rating?: number;
+  stock_quantity: number;
+}
+
+interface Props {
+  products: Product[];
+  emptyMessage?: string;
+}
+
+const { products, emptyMessage = 'No products found' } = Astro.props;
+---
+
+{products && products.length > 0 ? (
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    {products.map(product => (
+      <ProductCard
+        id={product._id}
+        name={product.name}
+        price={product.price}
+        image={product.images?.[0] || '/images/placeholder.jpg'}
+        rating={product.rating}
+        inStock={product.stock_quantity > 0}
+      />
+    ))}
+  </div>
+) : (
+  <div class="text-center py-12">
+    <svg 
+      class="mx-auto h-12 w-12 text-gray-400"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+      />
+    </svg>
+    <h3 class="mt-2 text-sm font-medium text-gray-900">{emptyMessage}</h3>
+    <p class="mt-1 text-sm text-gray-500">Try adjusting your filters or search terms.</p>
+    <div class="mt-6">
+      <a 
+        href="/shop"
+        class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700"
+      >
+        View All Products
+      </a>
+    </div>
+  </div>
+)}

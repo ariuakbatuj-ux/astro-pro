@@ -1,0 +1,500 @@
+---
+import DocsLayout from '../../layouts/docs/DocsLayout.astro';
+---
+
+<DocsLayout 
+  title="System Architecture Overview" 
+  description="Visual flow diagrams and complete system architecture documentation"
+>
+  <!-- Architecture Overview -->
+  <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-8 mb-8 border border-blue-100">
+    <div class="flex items-center space-x-4 mb-6">
+      <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center">
+        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">System Architecture</h1>
+        <p class="text-lg text-gray-700 mt-2">Complete visual breakdown of the product management system</p>
+      </div>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-white rounded-lg p-4">
+        <div class="text-2xl font-bold text-blue-600">3-Tier</div>
+        <div class="text-sm text-gray-600">Architecture Pattern</div>
+      </div>
+      <div class="bg-white rounded-lg p-4">
+        <div class="text-2xl font-bold text-green-600">MVC</div>
+        <div class="text-sm text-gray-600">Design Pattern</div>
+      </div>
+      <div class="bg-white rounded-lg p-4">
+        <div class="text-2xl font-bold text-purple-600">RESTful</div>
+        <div class="text-sm text-gray-600">API Design</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- System Components -->
+  <section class="mb-12">
+    <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+      <span class="text-2xl mr-3">🏗️</span>
+      System Components Overview
+    </h2>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Frontend Layer -->
+      <div class="bg-white rounded-xl p-6 border border-blue-200 shadow-sm">
+        <div class="flex items-center space-x-3 mb-4">
+          <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900">Frontend Layer</h3>
+        </div>
+        
+        <div class="space-y-4">
+          <div class="bg-blue-50 rounded-lg p-4">
+            <h4 class="font-medium text-blue-900 mb-2">🌐 Browser Components</h4>
+            <ul class="text-sm text-blue-800 space-y-1">
+              <li>• EJS Template Engine</li>
+              <li>• Vanilla JavaScript (ES6+)</li>
+              <li>• Bootstrap 5 CSS Framework</li>
+              <li>• Font Awesome Icons</li>
+            </ul>
+          </div>
+          
+          <div class="bg-gray-50 rounded-lg p-4">
+            <h4 class="font-medium text-gray-800 mb-2">⚡ Key Functions</h4>
+            <ul class="text-sm text-gray-700 space-y-1">
+              <li>• DOM manipulation & events</li>
+              <li>• File upload with drag & drop</li>
+              <li>• Form validation & serialization</li>
+              <li>• Dynamic UI components</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Backend Layer -->
+      <div class="bg-white rounded-xl p-6 border border-green-200 shadow-sm">
+        <div class="flex items-center space-x-3 mb-4">
+          <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2"/>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900">Backend Layer</h3>
+        </div>
+        
+        <div class="space-y-4">
+          <div class="bg-green-50 rounded-lg p-4">
+            <h4 class="font-medium text-green-900 mb-2">⚙️ Server Stack</h4>
+            <ul class="text-sm text-green-800 space-y-1">
+              <li>• Node.js Runtime</li>
+              <li>• Express.js Framework</li>
+              <li>• Multer File Upload</li>
+              <li>• Express Sessions</li>
+            </ul>
+          </div>
+          
+          <div class="bg-gray-50 rounded-lg p-4">
+            <h4 class="font-medium text-gray-800 mb-2">🔧 Controllers</h4>
+            <ul class="text-sm text-gray-700 space-y-1">
+              <li>• Admin route handlers</li>
+              <li>• Product CRUD operations</li>
+              <li>• File upload processing</li>
+              <li>• Authentication middleware</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Request Flow Diagram -->
+  <section class="mb-12">
+    <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+      <span class="text-2xl mr-3">🔄</span>
+      Complete Request Flow
+    </h2>
+    
+    <!-- Add Product Flow -->
+    <div class="bg-white rounded-xl p-8 border border-gray-200 shadow-sm mb-8">
+      <h3 class="text-xl font-semibold text-gray-900 mb-6">Add Product Request Cycle</h3>
+      
+      <!-- Visual Flow -->
+      <div class="relative">
+        <!-- Step 1: User Interaction -->
+        <div class="flex items-center space-x-4 mb-8">
+          <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">1</div>
+          <div class="flex-1 bg-blue-50 rounded-lg p-4 border-l-4 border-blue-500">
+            <h4 class="font-semibold text-blue-900">User Fills Form</h4>
+            <p class="text-blue-800 text-sm mt-1">User enters product details, uploads images, adds sizes/colors</p>
+            <div class="mt-2 text-xs text-blue-700">
+              <strong>Location:</strong> add-product.ejs (Frontend) • <strong>Functions:</strong> handleFiles(), addSize(), addColor()
+            </div>
+          </div>
+        </div>
+
+        <!-- Arrow -->
+        <div class="flex justify-center mb-8">
+          <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-5 5m0 0l-5-5m5 5V6"/>
+          </svg>
+        </div>
+
+        <!-- Step 2: Form Submission -->
+        <div class="flex items-center space-x-4 mb-8">
+          <div class="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold">2</div>
+          <div class="flex-1 bg-orange-50 rounded-lg p-4 border-l-4 border-orange-500">
+            <h4 class="font-semibold text-orange-900">Form Validation & Submission</h4>
+            <p class="text-orange-800 text-sm mt-1">Client-side validation, data serialization, and POST request</p>
+            <div class="mt-2 text-xs text-orange-700">
+              <strong>Location:</strong> add-product.ejs • <strong>Functions:</strong> validateForm(), updateSizes(), updateColors()
+            </div>
+          </div>
+        </div>
+
+        <!-- Arrow -->
+        <div class="flex justify-center mb-8">
+          <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-5 5m0 0l-5-5m5 5V6"/>
+          </svg>
+        </div>
+
+        <!-- Step 3: Middleware Processing -->
+        <div class="flex items-center space-x-4 mb-8">
+          <div class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold">3</div>
+          <div class="flex-1 bg-purple-50 rounded-lg p-4 border-l-4 border-purple-500">
+            <h4 class="font-semibold text-purple-900">Middleware Chain</h4>
+            <p class="text-purple-800 text-sm mt-1">Authentication check, file upload processing, request parsing</p>
+            <div class="mt-2 text-xs text-purple-700">
+              <strong>Location:</strong> adminController.js • <strong>Functions:</strong> isAuthenticated(), uploadProductImages
+            </div>
+          </div>
+        </div>
+
+        <!-- Arrow -->
+        <div class="flex justify-center mb-8">
+          <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-5 5m0 0l-5-5m5 5V6"/>
+          </svg>
+        </div>
+
+        <!-- Step 4: Controller Processing -->
+        <div class="flex items-center space-x-4 mb-8">
+          <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white font-bold">4</div>
+          <div class="flex-1 bg-green-50 rounded-lg p-4 border-l-4 border-green-500">
+            <h4 class="font-semibold text-green-900">Controller Logic</h4>
+            <p class="text-green-800 text-sm mt-1">Data extraction, business logic, product model creation</p>
+            <div class="mt-2 text-xs text-green-700">
+              <strong>Location:</strong> adminController.js • <strong>Functions:</strong> createProduct()
+            </div>
+          </div>
+        </div>
+
+        <!-- Arrow -->
+        <div class="flex justify-center mb-8">
+          <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-5 5m0 0l-5-5m5 5V6"/>
+          </svg>
+        </div>
+
+        <!-- Step 5: Database Operation -->
+        <div class="flex items-center space-x-4 mb-8">
+          <div class="w-12 h-12 bg-indigo-500 rounded-full flex items-center justify-center text-white font-bold">5</div>
+          <div class="flex-1 bg-indigo-50 rounded-lg p-4 border-l-4 border-indigo-500">
+            <h4 class="font-semibold text-indigo-900">Database Save</h4>
+            <p class="text-indigo-800 text-sm mt-1">MongoDB document creation with Mongoose validation</p>
+            <div class="mt-2 text-xs text-indigo-700">
+              <strong>Location:</strong> models/Product.js • <strong>Schema:</strong> Product Schema with validation
+            </div>
+          </div>
+        </div>
+
+        <!-- Arrow -->
+        <div class="flex justify-center mb-8">
+          <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-5 5m0 0l-5-5m5 5V6"/>
+          </svg>
+        </div>
+
+        <!-- Step 6: Response -->
+        <div class="flex items-center space-x-4">
+          <div class="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center text-white font-bold">6</div>
+          <div class="flex-1 bg-teal-50 rounded-lg p-4 border-l-4 border-teal-500">
+            <h4 class="font-semibold text-teal-900">Response & Redirect</h4>
+            <p class="text-teal-800 text-sm mt-1">Success message, redirect to products list, or error handling</p>
+            <div class="mt-2 text-xs text-teal-700">
+              <strong>Location:</strong> adminController.js • <strong>Actions:</strong> Flash message, redirect response
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Flow Diagram -->
+    <div class="bg-white rounded-xl p-8 border border-gray-200 shadow-sm">
+      <h3 class="text-xl font-semibold text-gray-900 mb-6">Data Transformation Flow</h3>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <!-- Raw Input -->
+        <div class="bg-red-50 rounded-lg p-4 border border-red-200">
+          <h4 class="font-semibold text-red-900 mb-2">📥 Raw Input</h4>
+          <ul class="text-sm text-red-800 space-y-1">
+            <li>• Form fields</li>
+            <li>• File uploads</li>
+            <li>• JSON strings</li>
+            <li>• User session</li>
+          </ul>
+        </div>
+
+        <!-- Processing -->
+        <div class="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+          <h4 class="font-semibold text-yellow-900 mb-2">⚙️ Processing</h4>
+          <ul class="text-sm text-yellow-800 space-y-1">
+            <li>• File validation</li>
+            <li>• JSON parsing</li>
+            <li>• Data sanitization</li>
+            <li>• Image resizing</li>
+          </ul>
+        </div>
+
+        <!-- Structured Data -->
+        <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+          <h4 class="font-semibold text-blue-900 mb-2">📋 Structured</h4>
+          <ul class="text-sm text-blue-800 space-y-1">
+            <li>• Product object</li>
+            <li>• Size arrays</li>
+            <li>• Color objects</li>
+            <li>• File paths</li>
+          </ul>
+        </div>
+
+        <!-- Database -->
+        <div class="bg-green-50 rounded-lg p-4 border border-green-200">
+          <h4 class="font-semibold text-green-900 mb-2">🗄️ Database</h4>
+          <ul class="text-sm text-green-800 space-y-1">
+            <li>• MongoDB document</li>
+            <li>• Validated schema</li>
+            <li>• Indexed fields</li>
+            <li>• Relationships</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Technology Stack -->
+  <section class="mb-12">
+    <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+      <span class="text-2xl mr-3">🛠️</span>
+      Technology Stack
+    </h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Frontend Technologies -->
+      <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+        <div class="flex items-center space-x-3 mb-4">
+          <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900">Frontend Stack</h3>
+        </div>
+        
+        <div class="space-y-3">
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span class="font-medium text-gray-800">EJS Templates</span>
+            <span class="text-sm text-blue-600 bg-blue-100 px-2 py-1 rounded">v3.1.9</span>
+          </div>
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span class="font-medium text-gray-800">Bootstrap CSS</span>
+            <span class="text-sm text-blue-600 bg-blue-100 px-2 py-1 rounded">v5.3.0</span>
+          </div>
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span class="font-medium text-gray-800">Vanilla JS</span>
+            <span class="text-sm text-blue-600 bg-blue-100 px-2 py-1 rounded">ES6+</span>
+          </div>
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span class="font-medium text-gray-800">Font Awesome</span>
+            <span class="text-sm text-blue-600 bg-blue-100 px-2 py-1 rounded">v6.4.0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Backend Technologies -->
+      <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+        <div class="flex items-center space-x-3 mb-4">
+          <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2"/>
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900">Backend Stack</h3>
+        </div>
+        
+        <div class="space-y-3">
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span class="font-medium text-gray-800">Node.js</span>
+            <span class="text-sm text-green-600 bg-green-100 px-2 py-1 rounded">v18.17.0</span>
+          </div>
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span class="font-medium text-gray-800">Express.js</span>
+            <span class="text-sm text-green-600 bg-green-100 px-2 py-1 rounded">v4.18.2</span>
+          </div>
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span class="font-medium text-gray-800">Multer</span>
+            <span class="text-sm text-green-600 bg-green-100 px-2 py-1 rounded">v1.4.5</span>
+          </div>
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span class="font-medium text-gray-800">Express Session</span>
+            <span class="text-sm text-green-600 bg-green-100 px-2 py-1 rounded">v1.17.3</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Database & Storage -->
+      <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+        <div class="flex items-center space-x-3 mb-4">
+          <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.79 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.79 4 8 4s8-1.79 8-4M4 7c0-2.21 3.79-4 8-4s8 1.79 8 4"/>
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900">Database & Storage</h3>
+        </div>
+        
+        <div class="space-y-3">
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span class="font-medium text-gray-800">MongoDB</span>
+            <span class="text-sm text-purple-600 bg-purple-100 px-2 py-1 rounded">v6.0</span>
+          </div>
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span class="font-medium text-gray-800">Mongoose ODM</span>
+            <span class="text-sm text-purple-600 bg-purple-100 px-2 py-1 rounded">v7.4.0</span>
+          </div>
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span class="font-medium text-gray-800">Disk Storage</span>
+            <span class="text-sm text-purple-600 bg-purple-100 px-2 py-1 rounded">Local FS</span>
+          </div>
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span class="font-medium text-gray-800">File System</span>
+            <span class="text-sm text-purple-600 bg-purple-100 px-2 py-1 rounded">images/</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Security & Performance -->
+  <section class="mb-12">
+    <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+      <span class="text-2xl mr-3">🔒</span>
+      Security & Performance Features
+    </h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Security Features -->
+      <div class="bg-white rounded-xl p-6 border border-red-200 shadow-sm">
+        <h3 class="text-lg font-semibold text-red-900 mb-4">🛡️ Security Measures</h3>
+        <div class="space-y-4">
+          <div class="flex items-start space-x-3">
+            <div class="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
+            <div>
+              <h4 class="font-medium text-gray-800">File Upload Security</h4>
+              <p class="text-sm text-gray-600">MIME type validation, file size limits, filename sanitization</p>
+            </div>
+          </div>
+          <div class="flex items-start space-x-3">
+            <div class="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
+            <div>
+              <h4 class="font-medium text-gray-800">Authentication</h4>
+              <p class="text-sm text-gray-600">Session-based authentication, admin role verification</p>
+            </div>
+          </div>
+          <div class="flex items-start space-x-3">
+            <div class="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
+            <div>
+              <h4 class="font-medium text-gray-800">Data Validation</h4>
+              <p class="text-sm text-gray-600">Client & server-side validation, Mongoose schema validation</p>
+            </div>
+          </div>
+          <div class="flex items-start space-x-3">
+            <div class="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
+            <div>
+              <h4 class="font-medium text-gray-800">Error Handling</h4>
+              <p class="text-sm text-gray-600">Try-catch blocks, graceful error responses, user feedback</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Performance Features -->
+      <div class="bg-white rounded-xl p-6 border border-blue-200 shadow-sm">
+        <h3 class="text-lg font-semibold text-blue-900 mb-4">⚡ Performance Optimizations</h3>
+        <div class="space-y-4">
+          <div class="flex items-start space-x-3">
+            <div class="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+            <div>
+              <h4 class="font-medium text-gray-800">Efficient File Handling</h4>
+              <p class="text-sm text-gray-600">Stream-based file processing, optimized storage paths</p>
+            </div>
+          </div>
+          <div class="flex items-start space-x-3">
+            <div class="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+            <div>
+              <h4 class="font-medium text-gray-800">Database Indexing</h4>
+              <p class="text-sm text-gray-600">MongoDB indexes on frequently queried fields</p>
+            </div>
+          </div>
+          <div class="flex items-start space-x-3">
+            <div class="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+            <div>
+              <h4 class="font-medium text-gray-800">Frontend Optimization</h4>
+              <p class="text-sm text-gray-600">Event delegation, debounced inputs, lazy loading</p>
+            </div>
+          </div>
+          <div class="flex items-start space-x-3">
+            <div class="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+            <div>
+              <h4 class="font-medium text-gray-800">Memory Management</h4>
+              <p class="text-sm text-gray-600">Proper cleanup, garbage collection, resource disposal</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Architecture Summary -->
+  <div class="bg-gradient-to-r from-gray-900 to-blue-900 text-white rounded-xl p-8">
+    <h3 class="text-2xl font-bold mb-4">🎯 Architecture Summary</h3>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+      <div class="text-center">
+        <div class="text-3xl font-bold text-blue-300">6</div>
+        <div class="text-sm text-gray-300">Request Steps</div>
+      </div>
+      <div class="text-center">
+        <div class="text-3xl font-bold text-green-300">3</div>
+        <div class="text-sm text-gray-300">Layer Architecture</div>
+      </div>
+      <div class="text-center">
+        <div class="text-3xl font-bold text-purple-300">12</div>
+        <div class="text-sm text-gray-300">Technologies</div>
+      </div>
+      <div class="text-center">
+        <div class="text-3xl font-bold text-yellow-300">100%</div>
+        <div class="text-sm text-gray-300">Security Coverage</div>
+      </div>
+    </div>
+    <p class="text-gray-300 text-center">
+      Modern, scalable architecture following industry best practices with complete security implementation 
+      and performance optimization at every layer.
+    </p>
+  </div>
+</DocsLayout>

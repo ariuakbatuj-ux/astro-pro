@@ -1,0 +1,136 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import ProductGrid from '../../../components/product/ProductGrid.astro';
+import { supabase } from '../../../lib/supabase';
+
+export async function getStaticPaths() {
+  const { data: categories } = await supabase
+    .from('categories')
+    .select('name, slug, _id')
+    .eq('status', 'active');
+
+  return categories?.map(cat => ({ 
+    params: { 
+      slug: cat.slug || cat.name.toLowerCase().replace(/\s+/g, '-')
+    } 
+  })) || [];
+}
+
+const { slug } = Astro.params;
+
+// Get category by slug
+const { data: category } = await supabase
+  .from('categories')
+  .select('*')
+  .or(`slug.eq.${slug},name.ilike.${slug.replace(/-/g, ' ')}`)
+  .eq('status', 'active')
+  .single();
+
+if (!category) {
+  return Astro.redirect('/shop/collections');
+}
+
+// Get products in this category
+const { data: products } = await supabase
+  .from('products')
+  .select('*')
+  .eq('category_id', category._id)
+  .eq('status', 'active')
+  .order('name');
+---
+
+<Layout title={`${category.name} Collection`} description={category.description || `Shop ${category.name} products`}>
+  <div class="min-h-screen bg-gray-50">
+    <!-- Collection Header -->
+    <div class="bg-white border-b">
+      <div class="container mx-auto px-4 py-8">
+        <!-- Breadcrumbs -->
+        <nav class="text-sm mb-4">
+          <ol class="flex items-center space-x-2 text-gray-500">
+            <li><a href="/" class="hover:text-orange-600">Home</a></li>
+            <li><span>/</span></li>
+            <li><a href="/shop" class="hover:text-orange-600">Shop</a></li>
+            <li><span>/</span></li>
+            <li><a href="/shop/collections" class="hover:text-orange-600">Collections</a></li>
+            <li><span>/</span></li>
+            <li class="text-gray-900 font-medium">{category.name}</li>
+          </ol>
+        </nav>
+
+        <!-- Category Info -->
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">{category.name}</h1>
+        {category.description && (
+          <p class="text-lg text-gray-600 max-w-3xl">{category.description}</p>
+        )}
+      </div>
+    </div>
+
+    <!-- Products -->
+    <div class="container mx-auto px-4 py-12">
+      <div class="flex items-center justify-between mb-8">
+        <p class="text-gray-600">
+          {products?.length || 0} {products?.length === 1 ? 'product' : 'products'} found
+        </p>
+        
+        <!-- Quick Sort -->
+        <select 
+          id="sortSelect"
+          class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+        >
+          <option value="default">Sort by</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+          <option value="name-asc">Name: A-Z</option>
+          <option value="name-desc">Name: Z-A</option>
+        </select>
+      </div>
+
+      <div id="productsContainer">
+        <ProductGrid products={products || []} />
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const sortSelect = document.getElementById('sortSelect') as HTMLSelectElement;
+    const productsContainer = document.getElementById('productsContainer');
+    
+    if (!sortSelect || !productsContainer) return;
+
+    let products = Array.from(productsContainer.querySelectorAll('.product-card'));
+
+    sortSelect.addEventListener('change', () => {
+      const sortValue = sortSelect.value;
+      
+      // Sort products based on selection
+      products.sort((a, b) => {
+        const priceA = parseFloat(a.getAttribute('data-price') || '0');
+        const priceB = parseFloat(b.getAttribute('data-price') || '0');
+        const nameA = a.getAttribute('data-name') || '';
+        const nameB = b.getAttribute('data-name') || '';
+
+        switch (sortValue) {
+          case 'price-asc':
+            return priceA - priceB;
+          case 'price-desc':
+            return priceB - priceA;
+          case 'name-asc':
+            return nameA.localeCompare(nameB);
+          case 'name-desc':
+            return nameB.localeCompare(nameA);
+          default:
+            return 0;
+        }
+      });
+
+      // Re-render sorted products
+      const grid = productsContainer.querySelector('.grid');
+      if (grid) {
+        grid.innerHTML = '';
+        products.forEach(product => grid.appendChild(product));
+      }
+    });
+  });
+</script>

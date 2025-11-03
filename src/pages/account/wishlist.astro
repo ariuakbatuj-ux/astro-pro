@@ -1,0 +1,186 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { verifyToken } from '../../lib/auth';
+
+const token = Astro.cookies.get('token')?.value;
+const user = token ? verifyToken(token) : null;
+
+if (!user) {
+  return Astro.redirect('/auth/signin');
+}
+---
+
+<Layout title="My Wishlist" description="View and manage your saved products">
+  <div class="min-h-screen bg-gray-50 py-12">
+    <div class="container mx-auto px-4">
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">My Wishlist</h1>
+        <a 
+          href="/account/profile"
+          class="text-orange-600 hover:text-orange-700 font-medium"
+        >
+          Back to Profile
+        </a>
+      </div>
+
+      <!-- Wishlist Container -->
+      <div id="wishlistContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Loading state -->
+        <div class="col-span-full text-center py-12">
+          <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
+          <p class="mt-4 text-gray-600">Loading your wishlist...</p>
+        </div>
+      </div>
+
+      <!-- Empty State (hidden by default, shown by JS) -->
+      <div id="emptyState" class="hidden text-center py-12">
+        <svg 
+          class="mx-auto h-12 w-12 text-gray-400"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+          />
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">Your wishlist is empty</h3>
+        <p class="mt-1 text-sm text-gray-500">Start adding products you love!</p>
+        <div class="mt-6">
+          <a 
+            href="/shop"
+            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700"
+          >
+            Browse Products
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script define:vars={{ userId: user?.userId }}>
+  async function loadWishlist() {
+    const wishlistContainer = document.getElementById('wishlistContainer');
+    const emptyState = document.getElementById('emptyState');
+    
+    if (!wishlistContainer || !emptyState) return;
+
+    try {
+      const response = await fetch(`/api/wishlist?userId=${userId}`);
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to load wishlist');
+      }
+
+      const wishlistItems = result.data || [];
+
+      if (wishlistItems.length === 0) {
+        wishlistContainer.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      // Render wishlist items
+      wishlistContainer.innerHTML = wishlistItems.map(item => `
+        <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+          <div class="relative">
+            <a href="/shop/product/${item.product_id}">
+              <img 
+                src="${item.products?.images?.[0] || '/images/placeholder.jpg'}" 
+                alt="${item.products?.name || 'Product'}"
+                class="w-full h-64 object-cover"
+              />
+            </a>
+            <button 
+              onclick="removeFromWishlist(${item._id}, ${item.product_id})"
+              class="absolute top-2 right-2 p-2 bg-white rounded-full shadow-md hover:bg-red-50 transition-colors"
+              title="Remove from wishlist"
+            >
+              <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </div>
+          <div class="p-4">
+            <a href="/shop/product/${item.product_id}">
+              <h3 class="font-semibold text-lg mb-2 hover:text-orange-600 transition-colors line-clamp-2">
+                ${item.products?.name || 'Product'}
+              </h3>
+            </a>
+            <div class="flex items-center justify-between">
+              <p class="text-2xl font-bold text-orange-600">$${(item.products?.price || 0).toFixed(2)}</p>
+              ${item.products?.stock_quantity > 0 ? `
+                <button 
+                  onclick="addToCart(${item.product_id})"
+                  class="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors text-sm font-semibold"
+                >
+                  Add to Cart
+                </button>
+              ` : `
+                <span class="text-red-500 text-sm font-semibold">Out of Stock</span>
+              `}
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+    } catch (error) {
+      console.error('Error loading wishlist:', error);
+      wishlistContainer.innerHTML = `
+        <div class="col-span-full text-center py-12">
+          <p class="text-red-600">Failed to load wishlist. Please try again.</p>
+        </div>
+      `;
+    }
+  }
+
+  window.removeFromWishlist = async function(wishlistId, productId) {
+    if (!confirm('Remove this item from your wishlist?')) return;
+
+    try {
+      const response = await fetch('/api/wishlist', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ wishlistId, userId })
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        // Reload wishlist
+        loadWishlist();
+      } else {
+        alert(result.message || 'Failed to remove item');
+      }
+    } catch (error) {
+      console.error('Error removing from wishlist:', error);
+      alert('Failed to remove item');
+    }
+  };
+
+  window.addToCart = function(productId) {
+    // Dispatch event that cart component can listen to
+    window.dispatchEvent(new CustomEvent('addToCart', {
+      detail: { productId }
+    }));
+    alert('Added to cart!');
+  };
+
+  // Load wishlist on page load
+  document.addEventListener('DOMContentLoaded', loadWishlist);
+</script>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

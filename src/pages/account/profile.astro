@@ -1,0 +1,1582 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { supabase } from '../../lib/supabase';
+import { verifyToken } from '../../lib/auth';
+import mongoliaAddresses from '../../data/mongoliaAddresses.js';
+
+// Get JWT from cookies
+const cookies = Astro.cookies;
+const token = cookies.get('token')?.value || '';
+
+let userId: number | null = null;
+let user: any = null;
+let profile: any = null;
+let orders: any[] = [];
+let wishlist: any[] = [];
+let userError = null;
+
+if (token) {
+  const decoded = verifyToken(token);
+  if (decoded && decoded.userId) {
+    userId = typeof decoded.userId === 'string' ? parseInt(decoded.userId) : decoded.userId;
+  } else {
+    return Astro.redirect('/auth/signin');
+  }
+} else {
+  return Astro.redirect('/auth/signin');
+}
+
+if (userId) {
+  // Fetch user data from database
+  const { data: userData, error: uErr } = await supabase
+    .from('users')
+    .select('_id, username, email, first_name, last_name, phone, role, account_status, created_at')
+    .eq('_id', userId)
+    .single();
+  
+  userError = uErr;
+
+  // Fetch user profile data
+  const { data: profileData } = await supabase
+    .from('profiles')
+    .select('_id, name, phone, aimag, sum, horoo, address_detail, language, currency, birthday')
+    .eq('user_id', userId)
+    .single();
+
+  // Fetch user orders - limit to 10 most recent
+  const { data: ordersData } = await supabase
+    .from('orders')
+    .select('_id, order_number, total_amount, status, payment_method, payment_status, created_at, shipping_address')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(10);
+
+  // Fetch wishlist items with product details - limit to 20 most recent
+  const { data: wishlistData } = await supabase
+    .from('wishlist')
+    .select(`
+      _id,
+      product_id,
+      created_at,
+      products!inner (
+        _id,
+        name,
+        description,
+        price,
+        images,
+        stock_quantity,
+        rating,
+        status
+      )
+    `)
+    .eq('user_id', userId)
+    .eq('products.status', 'active')
+    .order('created_at', { ascending: false })
+    .limit(20);
+
+  // Transform data for frontend
+  user = userData ? {
+    id: userData._id,
+    username: userData.username,
+    email: userData.email,
+    firstName: userData.first_name || '',
+    lastName: userData.last_name || '',
+    phone: userData.phone || '',
+    role: userData.role,
+    accountStatus: userData.account_status,
+  createdAt: userData.created_at
+  } : null;
+
+  profile = profileData ? {
+    id: profileData._id,
+    name: profileData.name || '',
+    phone: profileData.phone || '',
+    aimag: profileData.aimag || '',
+    sum: profileData.sum || '',
+    horoo: profileData.horoo || '',
+    addressDetail: profileData.address_detail || '',
+    language: profileData.language || 'en',
+    currency: profileData.currency || 'USD',
+    birthday: profileData.birthday || ''
+  } : {
+    name: '',
+    phone: '',
+    aimag: '',
+    sum: '',
+    horoo: '',
+    addressDetail: '',
+    language: 'en',
+    currency: 'USD',
+    birthday: ''
+  };
+
+  orders = ordersData?.map(order => ({
+    id: order._id,
+    orderNumber: order.order_number,
+    totalAmount: order.total_amount,
+    status: order.status,
+    paymentMethod: order.payment_method,
+    paymentStatus: order.payment_status,
+    createdAt: new Date(order.created_at).toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    }),
+    shippingAddress: order.shipping_address
+  })) || [];
+
+  // Transform wishlist data
+  wishlist = wishlistData?.map((item: any) => {
+    // Handle both array and object response from Supabase
+    const product = Array.isArray(item.products) ? item.products[0] : item.products;
+    
+    // Handle image parsing
+    let imageUrl = 'https://via.placeholder.com/400x300?text=No+Image';
+    if (product?.images) {
+      try {
+        if (Array.isArray(product.images) && product.images.length > 0) {
+          imageUrl = product.images[0];
+        } else if (typeof product.images === 'string') {
+          const parsed = JSON.parse(product.images);
+          imageUrl = Array.isArray(parsed) && parsed.length > 0 ? parsed[0] : imageUrl;
+        }
+      } catch (e) {
+        if (typeof product.images === 'string' && product.images.startsWith('http')) {
+          imageUrl = product.images;
+        }
+      }
+    }
+    
+    return {
+      wishlistId: item._id,
+      productId: product?._id,
+      name: product?.name || 'Unnamed Product',
+      description: product?.description || 'No description available',
+      price: parseFloat(product?.price) || 0,
+      image: imageUrl,
+      stock_quantity: product?.stock_quantity || 0,
+      rating: product?.rating || 0,
+      addedAt: new Date(item.created_at).toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      })
+    };
+  }) || [];
+} else {
+  userError = 'Not authenticated';
+}const getInitials = (name: string, username: string) => {
+  if (name) {
+    const parts = name.split(' ');
+    return parts.length > 1 
+      ? `${parts[0][0]}${parts[1][0]}`.toUpperCase()
+      : name.substring(0, 2).toUpperCase();
+  }
+  return username.substring(0, 2).toUpperCase();
+};
+
+const userInitials = user ? getInitials(profile?.name || '', user.username) : 'U';
+const displayName = profile?.name || `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.username || 'User';
+const firstName = user?.firstName || (profile?.name ? profile.name.split(' ')[0] : '');
+const lastName = user?.lastName || (profile?.name ? profile.name.split(' ').slice(1).join(' ') : '');
+
+if (userError || !user) {
+  console.error('Error fetching user:', userError);
+}
+---
+
+<Layout title="Profile - ShopHub" description="Manage your profile and account settings">
+  
+  <div class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center space-x-4">
+            <a href="/shop" class="text-xl font-bold text-orange-600">ShopHub</a>
+            <nav class="hidden md:flex space-x-6">
+              <a href="/shop" class="text-gray-700 hover:text-orange-600 transition-colors">Shop</a>
+              <a href="/account/orders" class="text-gray-700 hover:text-orange-600 transition-colors">My Orders</a>
+              <a href="/account/profile" class="text-orange-600 font-medium">Profile</a>
+            </nav>
+          </div>
+          <div class="flex items-center space-x-4">
+            <button onclick="logout()" class="text-gray-700 hover:text-red-600 transition-colors">Logout</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <!-- Sidebar Navigation -->
+        <div class="lg:col-span-1">
+          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="text-center mb-6">
+              <div class="w-20 h-20 bg-orange-500 rounded-full mx-auto flex items-center justify-center mb-3">
+                <span class="text-2xl font-bold text-white" id="userInitials">{userInitials}</span>
+              </div>
+              <h3 class="text-lg font-semibold text-gray-900" id="userName">{displayName}</h3>
+              <p class="text-sm text-gray-600">@{user?.username || 'username'}</p>
+              <p class="text-sm text-gray-600" id="userEmail">{user?.email || 'user@example.com'}</p>
+            </div>
+            
+            <nav class="space-y-2">
+              <button onclick="showSection('personal')" class="profile-nav-btn active w-full text-left px-4 py-2 rounded-lg transition-colors">
+                Personal Info
+              </button>
+              <button onclick="showSection('address')" class="profile-nav-btn w-full text-left px-4 py-2 rounded-lg transition-colors">
+                Addresses
+              </button>
+              <button onclick="showSection('wishlist')" class="profile-nav-btn w-full text-left px-4 py-2 rounded-lg transition-colors">
+                <span class="flex items-center justify-between">
+                  Wishlist
+                  <span id="wishlistCount" class="bg-orange-500 text-white text-xs px-2 py-1 rounded-full">{wishlist.length}</span>
+                </span>
+              </button>
+              <button onclick="showSection('orders')" class="profile-nav-btn w-full text-left px-4 py-2 rounded-lg transition-colors">
+                Order History
+              </button>
+              <button onclick="showSection('security')" class="profile-nav-btn w-full text-left px-4 py-2 rounded-lg transition-colors">
+                Security
+              </button>
+              <button onclick="showSection('preferences')" class="profile-nav-btn w-full text-left px-4 py-2 rounded-lg transition-colors">
+                Preferences
+              </button>
+            </nav>
+          </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="lg:col-span-3">
+          <!-- Personal Information Section -->
+          <div id="personalSection" class="profile-section bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-2xl font-bold text-gray-900">Personal Information</h2>
+              <button onclick="toggleEdit('personal')" id="editPersonalBtn" class="text-orange-600 hover:text-orange-700 font-medium">
+                Edit
+              </button>
+            </div>
+            
+            <form id="personalForm" class="space-y-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                  <input type="text" id="firstName" value={firstName} class="profile-input w-full px-3 py-2 border border-gray-300 rounded-md" disabled>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                  <input type="text" id="lastName" value={lastName} class="profile-input w-full px-3 py-2 border border-gray-300 rounded-md" disabled>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+                  <input type="tel" id="phone" value={user?.phone || profile?.phone || ''} class="profile-input w-full px-3 py-2 border border-gray-300 rounded-md" disabled>
+                </div>
+              </div>
+              
+              <div id="personalActions" class="hidden">
+                <div class="flex space-x-4">
+                  <button type="button" onclick="savePersonal()" class="bg-orange-500 text-white px-6 py-2 rounded-md hover:bg-orange-600 transition-colors">
+                    Save Changes
+                  </button>
+                  <button type="button" onclick="cancelEdit('personal')" class="bg-gray-300 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-400 transition-colors">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- Address Section -->
+          <div id="addressSection" class="profile-section hidden bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-2xl font-bold text-gray-900">Address Information</h2>
+              <button onclick="toggleEditAddress()" id="editAddressBtn" class="text-orange-600 hover:text-orange-700 font-medium">
+                Edit
+              </button>
+            </div>
+            
+            <!-- Address Form -->
+            <div id="addressForm" class="hidden mb-6">
+              <div class="space-y-4">
+                <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg mb-4">
+                  <p class="text-sm text-blue-800 font-medium mb-1">� Select Your Address</p>
+                  <p class="text-sm text-blue-700">Choose your province/city, then district/sum, and horoo (if applicable)</p>
+                </div>
+
+                <!-- Level 1: Province/City -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Province / City *</label>
+                  <select 
+                    id="aimagSelect" 
+                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  >
+                    <option value="">-- Select Province/City --</option>
+                    {Object.keys(mongoliaAddresses).map(aimag => (
+                      <option value={aimag}>{aimag}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <!-- Level 2: District/Sum -->
+                <div id="districtSumContainer" class="hidden">
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <span id="districtSumLabel">District / Sum</span> *
+                  </label>
+                  <select 
+                    id="districtSumSelect" 
+                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  >
+                    <option value="">-- Select --</option>
+                  </select>
+                </div>
+
+                <!-- Level 3: Horoo (only for Ulaanbaatar) -->
+                <div id="horooContainer" class="hidden">
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Horoo *</label>
+                  <select 
+                    id="horooSelect" 
+                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  >
+                    <option value="">-- Select Horoo --</option>
+                  </select>
+                </div>
+
+                <!-- Selected Address Display -->
+                <div id="selectedAddressDisplay" class="hidden p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <p class="text-sm font-medium text-green-800 mb-1">✓ Selected Address:</p>
+                  <p id="selectedAddressText" class="text-gray-800 font-medium"></p>
+                </div>
+                
+                <!-- Additional Details -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Additional Details (Optional)</label>
+                  <input 
+                    type="text" 
+                    id="addressDetails" 
+                    placeholder="e.g., Building 5, Apartment 23, Near Central Park"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    value={profile?.addressDetail || ''}
+                  />
+                  <p class="text-xs text-gray-500 mt-1">Add specific building, apartment, or landmark information</p>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex space-x-4">
+                  <button type="button" onclick="saveAddress()" class="bg-orange-500 text-white px-6 py-2 rounded-md hover:bg-orange-600 transition-colors flex-1">
+                    💾 Save Address
+                  </button>
+                  <button type="button" onclick="cancelEditAddress()" class="bg-gray-300 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-400 transition-colors">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <div id="savedAddress">
+              {(profile?.aimag || profile?.sum || profile?.horoo) ? (
+                <div class="border border-gray-200 rounded-lg p-4">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-medium">📍 Primary Address</span>
+                  </div>
+                  <p class="text-gray-900 font-medium">{displayName}</p>
+                  <div class="mt-3 space-y-1">
+                    {profile.aimag && <p class="text-gray-700"><span class="font-medium">Province/City:</span> {profile.aimag}</p>}
+                    {profile.sum && <p class="text-gray-700"><span class="font-medium">District/Sum:</span> {profile.sum}</p>}
+                    {profile.horoo && <p class="text-gray-700"><span class="font-medium">Horoo:</span> {profile.horoo}</p>}
+                    {profile.addressDetail && <p class="text-gray-700 mt-2"><span class="font-medium">Details:</span> {profile.addressDetail}</p>}
+                  </div>
+                  {(user?.phone || profile.phone) && <p class="text-gray-600 mt-3 pt-3 border-t">Phone: {user?.phone || profile.phone}</p>}
+                </div>
+              ) : (
+                <div class="text-center py-8">
+                  <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  </svg>
+                  <p class="text-gray-500">No address saved yet</p>
+                  <p class="text-sm text-gray-400 mt-2">Click "Edit" to select your address</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <!-- Wishlist Section -->
+          <div id="wishlistSection" class="profile-section hidden bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">My Wishlist</h2>
+            
+            {wishlist.length === 0 ? (
+              <div class="text-center py-12">
+                <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                </svg>
+                <p class="text-gray-500 text-lg">Your wishlist is empty</p>
+                <a href="/shop" class="mt-4 inline-block bg-orange-500 text-white px-6 py-2 rounded-md hover:bg-orange-600 transition-colors">
+                  Browse Products
+                </a>
+              </div>
+            ) : (
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {wishlist.map((item) => (
+                  <div class="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                    <div class="relative">
+                      <img 
+                        src={item.image} 
+                        alt={item.name}
+                        class="w-full h-48 object-cover"
+                      />
+                      {item.stock_quantity === 0 && (
+                        <div class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-md text-xs font-medium">
+                          Out of Stock
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div class="p-4">
+                      <h3 class="font-semibold text-gray-900 mb-2 line-clamp-2">{item.name}</h3>
+                      <p class="text-sm text-gray-600 mb-3 line-clamp-2">{item.description}</p>
+                      
+                      <div class="flex items-center justify-between mb-3">
+                        <div>
+                          <span class="text-2xl font-bold text-orange-500">${item.price.toFixed(2)}</span>
+                          {item.rating > 0 && (
+                            <div class="flex items-center mt-1">
+                              <span class="text-yellow-400">★</span>
+                              <span class="text-sm text-gray-600 ml-1">{item.rating.toFixed(1)}</span>
+                            </div>
+                          )}
+                        </div>
+                        {item.stock_quantity > 0 && (
+                          <span class="text-sm text-green-600">In Stock ({item.stock_quantity})</span>
+                        )}
+                      </div>
+                      
+                      <p class="text-xs text-gray-400 mb-3">Added on {item.addedAt}</p>
+                      
+                      <div class="flex gap-2">
+                        <a 
+                          href={`/shop/product/${item.productId}`}
+                          class="flex-1 bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 transition-colors text-center text-sm"
+                        >
+                          View Product
+                        </a>
+                        <button 
+                          onclick={`removeFromWishlist(${item.productId})`}
+                          class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors text-sm"
+                          title="Remove from wishlist"
+                        >
+                          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <!-- Order History Section -->
+          <div id="ordersSection" class="profile-section hidden bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Order History</h2>
+            
+            {orders.length === 0 ? (
+              <div class="text-center py-12">
+                <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                </svg>
+                <p class="text-gray-500 text-lg">No orders yet</p>
+                <a href="/shop" class="mt-4 inline-block bg-orange-500 text-white px-6 py-2 rounded-md hover:bg-orange-600 transition-colors">
+                  Start Shopping
+                </a>
+              </div>
+            ) : (
+              <div class="space-y-4">
+                {orders.map((order) => (
+                  <div class="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors">
+                    <div class="flex items-center justify-between mb-4">
+                      <div>
+                        <h3 class="font-semibold text-gray-900">Order #{order.orderNumber}</h3>
+                        <p class="text-sm text-gray-600">Placed on {order.createdAt}</p>
+                      </div>
+                      <div class="text-right">
+                        <p class="font-semibold text-gray-900">${order.totalAmount.toFixed(2)}</p>
+                        <span class={`px-2 py-1 rounded-full text-xs font-medium ${
+                          order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                          order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
+                          order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                        </span>
+                      </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-gray-200">
+                      <div class="flex space-x-4">
+                        <button class="text-orange-600 hover:text-orange-700 text-sm font-medium">View Details</button>
+                        {order.status === 'delivered' && (
+                          <button class="text-orange-600 hover:text-orange-700 text-sm font-medium">Reorder</button>
+                        )}
+                        {order.status === 'pending' && (
+                          <button class="text-red-600 hover:text-red-700 text-sm font-medium">Cancel Order</button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <!-- Security Section -->
+          <div id="securitySection" class="profile-section hidden bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Security Settings</h2>
+            
+            <div class="space-y-8">
+              <!-- Account Information (Read-Only) -->
+              <div>
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Account Information</h3>
+                <div class="space-y-4 max-w-md bg-gray-50 p-4 rounded-lg">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Username</label>
+                    <p class="text-gray-900 font-medium">@{user?.username || 'username'}</p>
+                    <p class="text-xs text-gray-500 mt-1">Username cannot be changed</p>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Email Address</label>
+                    <p class="text-gray-900 font-medium">{user?.email || 'user@example.com'}</p>
+                    <p class="text-xs text-gray-500 mt-1">Contact support to change your email</p>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Account Status</label>
+                    <span class={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                      user?.accountStatus === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {user?.accountStatus === 'active' ? '✓ Active' : user?.accountStatus || 'Unknown'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="border-t border-gray-200 pt-8">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Change Password</h3>
+                <form class="space-y-4 max-w-md">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
+                    <input type="password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">New Password</label>
+                    <input type="password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Confirm New Password</label>
+                    <input type="password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                  </div>
+                  <button type="submit" class="bg-orange-500 text-white px-6 py-2 rounded-md hover:bg-orange-600 transition-colors">
+                    Update Password
+                  </button>
+                </form>
+              </div>
+              
+              <div class="border-t border-gray-200 pt-8">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Two-Factor Authentication</h3>
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-gray-700">Add an extra layer of security to your account</p>
+                    <p class="text-sm text-gray-500">Receive SMS codes when signing in</p>
+                  </div>
+                  <button class="bg-orange-500 text-white px-6 py-2 rounded-md hover:bg-orange-600 transition-colors">
+                    Enable 2FA
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preferences Section -->
+          <div id="preferencesSection" class="profile-section hidden bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Preferences</h2>
+            
+            <div class="space-y-8">
+              <div>
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Email Notifications</h3>
+                <div class="space-y-3">
+                  <label class="flex items-center">
+                    <input type="checkbox" checked class="rounded border-gray-300 text-orange-600 focus:ring-orange-500">
+                    <span class="ml-2 text-gray-700">Order updates and shipping notifications</span>
+                  </label>
+                  <label class="flex items-center">
+                    <input type="checkbox" checked class="rounded border-gray-300 text-orange-600 focus:ring-orange-500">
+                    <span class="ml-2 text-gray-700">New product announcements</span>
+                  </label>
+                  <label class="flex items-center">
+                    <input type="checkbox" class="rounded border-gray-300 text-orange-600 focus:ring-orange-500">
+                    <span class="ml-2 text-gray-700">Promotional emails and special offers</span>
+                  </label>
+                </div>
+              </div>
+              
+              <div class="border-t border-gray-200 pt-8">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Shopping Preferences</h3>
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Preferred Currency</label>
+                    <select id="currencySelect" class="w-48 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                      <option value="USD" selected={profile?.currency === 'USD'}>USD ($)</option>
+                      <option value="EUR" selected={profile?.currency === 'EUR'}>EUR (€)</option>
+                      <option value="GBP" selected={profile?.currency === 'GBP'}>GBP (£)</option>
+                      <option value="MNT" selected={profile?.currency === 'MNT'}>MNT (₮)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Language</label>
+                    <select id="languageSelect" class="w-48 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                      <option value="en" selected={profile?.language === 'en'}>English</option>
+                      <option value="mn" selected={profile?.language === 'mn'}>Монгол (Mongolian)</option>
+                      <option value="es" selected={profile?.language === 'es'}>Spanish</option>
+                      <option value="fr" selected={profile?.language === 'fr'}>French</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="border-t border-gray-200 pt-8">
+                <button onclick="savePreferences()" class="bg-orange-500 text-white px-6 py-2 rounded-md hover:bg-orange-600 transition-colors">
+                  Save Preferences
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script is:inline>
+    window.__USER_ID__ = "${user ? user.id : ''}";
+    window.__DEBUG_AUTH__ = {
+      hasToken: "${token ? 'yes' : 'no'}",
+      userId: "${userId || 'null'}",
+      userFound: "${user ? 'yes' : 'no'}",
+      userError: "${userError || 'none'}"
+    };
+    window.__SAVED_ADDRESS__ = {
+      aimag: "${profile?.aimag || ''}",
+      sum: "${profile?.sum || ''}",
+      horoo: "${profile?.horoo || ''}"
+    };
+    
+    console.log('Saved Address:', window.__SAVED_ADDRESS__);
+    
+    function showSection(sectionName) {
+      // Hide all sections
+      document.querySelectorAll('.profile-section').forEach(section => {
+        section.classList.add('hidden');
+      });
+      
+      // Remove active class from all nav buttons
+      document.querySelectorAll('.profile-nav-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      // Show selected section
+      const targetSection = document.getElementById(sectionName + 'Section');
+      if (targetSection) {
+        targetSection.classList.remove('hidden');
+      }
+    }
+
+    function toggleEdit(section) {
+      const inputs = document.querySelectorAll('#' + section + 'Form .profile-input');
+      const actions = document.getElementById(section + 'Actions');
+      const btn = document.getElementById('edit' + section.charAt(0).toUpperCase() + section.slice(1) + 'Btn');
+      
+      if (inputs.length === 0) {
+        return;
+      }
+      
+      const firstInput = inputs[0];
+      const isEditing = firstInput && firstInput.disabled === false;
+      
+      inputs.forEach(input => {
+        if (input && typeof input.disabled !== 'undefined') {
+          input.disabled = isEditing;
+        }
+        if (isEditing) {
+          input.classList.remove('bg-white', 'focus:ring-2', 'focus:ring-orange-500');
+          input.classList.add('bg-gray-100');
+        } else {
+          input.classList.add('bg-white', 'focus:ring-2', 'focus:ring-orange-500');
+          input.classList.remove('bg-gray-100');
+        }
+      });
+      
+      if (isEditing) {
+        if (actions) actions.classList.add('hidden');
+        if (btn) btn.textContent = 'Edit';
+      } else {
+        if (actions) actions.classList.remove('hidden');
+        if (btn) btn.textContent = 'Cancel';
+      }
+    }
+
+    async function savePersonal() {
+      const firstName = document.getElementById('firstName').value;
+      const lastName = document.getElementById('lastName').value;
+      const phone = document.getElementById('phone').value;
+      const aimag = document.getElementById('aimagSelect').value;
+      const sum = document.getElementById('sumSelect').value;
+      const horoo = document.getElementById('horooSelect').value;
+      const addressDetail = document.getElementById('addressDetail').value;
+      
+        const birthdayInput = document.getElementById('birthday');
+        const birthday = birthdayInput ? birthdayInput.value : null;
+
+      try {
+        const requestBody = {
+          userId: window.__USER_ID__,
+          firstName,
+          lastName,
+          phone,
+          aimag,
+          sum,
+          horoo,
+          addressDetail
+        };
+
+        if (birthday) {
+          requestBody.birthday = birthday;
+        }        const response = await fetch('/api/profile/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showNotification('✅ Profile updated successfully!');
+          
+          const fullName = `${firstName} ${lastName}`.trim();
+          const userNameElement = document.getElementById('userName');
+          if (userNameElement && fullName) {
+            userNameElement.textContent = fullName;
+          }
+          
+          const userInitialsElement = document.getElementById('userInitials');
+          if (userInitialsElement && fullName) {
+            const parts = fullName.split(' ');
+            const initials = parts.length > 1 
+              ? `${parts[0][0]}${parts[1][0]}`.toUpperCase()
+              : fullName.substring(0, 2).toUpperCase();
+            userInitialsElement.textContent = initials;
+          }
+          
+          cancelEdit('personal');
+        } else {
+          showNotification('❌ Error: ' + (data.error || 'Failed to update profile'), 'error');
+        }
+      } catch (error) {
+        console.error('Save error:', error);
+        showNotification('❌ Network error. Please try again.', 'error');
+      }
+    }
+
+    function cancelEdit(section) {
+      const inputs = document.querySelectorAll('#' + section + 'Form .profile-input');
+      const actions = document.getElementById(section + 'Actions');
+      const btn = document.getElementById('edit' + section.charAt(0).toUpperCase() + section.slice(1) + 'Btn');
+      
+      inputs.forEach(input => {
+        if (input && typeof input.disabled !== 'undefined') {
+          input.disabled = true;
+        }
+        input.classList.remove('bg-white', 'focus:ring-2', 'focus:ring-orange-500');
+        input.classList.add('bg-gray-100');
+      });
+      
+      if (actions) actions.classList.add('hidden');
+      if (btn) btn.textContent = 'Edit';
+    }
+
+    async function savePreferences() {
+      const language = document.getElementById('languageSelect').value;
+      const currency = document.getElementById('currencySelect').value;
+
+      try {
+        const response = await fetch('/api/profile/preferences', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: window.__USER_ID__,
+            language,
+            currency
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showNotification('✅ Preferences saved successfully!');
+        } else {
+          showNotification('❌ Error: ' + (data.error || 'Failed to save preferences'), 'error');
+        }
+      } catch (error) {
+        console.error('Save preferences error:', error);
+        showNotification('❌ Network error. Please try again.', 'error');
+      }
+    }
+
+    let currentAimagType = null;
+    async function loadAimags() {
+      try {
+        const response = await fetch('/api/addresses/aimags');
+        
+        if (!response.ok) {
+          console.error('API response not OK:', response.status, response.statusText);
+          return;
+        }
+        
+        const result = await response.json();
+        
+        if (!result.success) {
+          console.error('Failed to load aimags');
+          return;
+        }
+
+        const aimagSelect = document.getElementById('aimagSelect');
+        const currentAimag = aimagSelect.getAttribute('data-value');
+        
+        aimagSelect.innerHTML = '<option value="">Сонгоно уу...</option>';
+        
+        result.data.forEach((aimag, index) => {
+          const option = document.createElement('option');
+          option.value = aimag.name;
+          option.textContent = aimag.name;
+          option.setAttribute('data-type', aimag.type);
+          if (currentAimag && aimag.name === currentAimag) {
+            option.selected = true;
+            currentAimagType = aimag.type;
+          }
+          aimagSelect.appendChild(option);
+        });
+
+        if (currentAimag) {
+          await loadDistrictsOrSums(currentAimag, currentAimagType);
+        }
+      } catch (error) {
+        console.error('Error loading aimags:', error);
+      }
+    }
+
+    async function loadDistrictsOrSums(aimag, aimagType) {
+      try {
+        const response = await fetch(`/api/addresses/districts-sums/${encodeURIComponent(aimag)}`);
+        
+        if (!response.ok) {
+          console.error('Districts/sums API error:', response.status, response.statusText);
+          return;
+        }
+        
+        const result = await response.json();
+        
+        if (!result.success) {
+          console.error('Failed to load districts/sums');
+          return;
+        }
+
+        const sumSelect = document.getElementById('sumSelect');
+        const horooDiv = document.getElementById('horooDiv');
+        const sumLabel = document.getElementById('sumLabel');
+        const currentSum = sumSelect.getAttribute('data-value');
+        
+        sumSelect.innerHTML = '<option value="">Сонгоно уу...</option>';
+        document.getElementById('horooSelect').innerHTML = '<option value="">Сонгоно уу...</option>';
+        
+        result.data.forEach((item) => {
+          const option = document.createElement('option');
+          option.value = item;
+          option.textContent = item;
+          if (currentSum && item === currentSum) {
+            option.selected = true;
+          }
+          sumSelect.appendChild(option);
+        });
+        
+        if (aimagType === 'city') {
+          sumLabel.textContent = 'Дүүрэг (District)';
+          horooDiv.style.display = 'block';
+        } else {
+          sumLabel.textContent = 'Сум (Sum)';
+          horooDiv.style.display = 'none';
+        }
+
+        if (currentSum && aimagType === 'city') {
+          await loadHoroos(aimag, currentSum);
+        }
+      } catch (error) {
+        console.error('Error loading districts/sums:', error);
+      }
+    }
+
+    async function loadHoroos(aimag, district) {
+      try {
+        const response = await fetch(
+          `/api/addresses/horoos/${encodeURIComponent(aimag)}/${encodeURIComponent(district)}`
+        );
+        const result = await response.json();
+        
+        if (!result.success) {
+          console.log('No horoos available');
+          return;
+        }
+        
+        const horooSelect = document.getElementById('horooSelect');
+        const currentHoroo = horooSelect.getAttribute('data-value');
+        
+        horooSelect.innerHTML = '<option value="">Сонгоно уу...</option>';
+        
+        result.data.forEach(horoo => {
+          const option = document.createElement('option');
+          option.value = horoo;
+          option.textContent = horoo;
+          if (currentHoroo && horoo === currentHoroo) {
+            option.selected = true;
+          }
+          horooSelect.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Error loading horoos:', error);
+      }
+    }
+
+    function setupAddressListeners() {
+      const aimagSelect = document.getElementById('aimagSelect');
+      const sumSelect = document.getElementById('sumSelect');
+
+      const savedAimag = profileData?.aimag || '';
+      const savedSum = profileData?.sum || '';
+      const savedHoroo = profileData?.horoo || '';
+      
+      aimagSelect.setAttribute('data-value', savedAimag);
+      sumSelect.setAttribute('data-value', savedSum);
+      document.getElementById('horooSelect').setAttribute('data-value', savedHoroo);
+
+      aimagSelect.addEventListener('change', (e) => {
+        const aimag = e.target.value;
+        const aimagType = e.target.options[e.target.selectedIndex].getAttribute('data-type');
+        currentAimagType = aimagType;
+        
+        if (aimag) {
+          loadDistrictsOrSums(aimag, aimagType);
+        } else {
+          // Reset
+          sumSelect.innerHTML = '<option value="">Сонгоно уу...</option>';
+          document.getElementById('horooSelect').innerHTML = '<option value="">Сонгоно уу...</option>';
+          document.getElementById('horooDiv').style.display = 'none';
+        }
+      });
+      
+      sumSelect.addEventListener('change', (e) => {
+        const aimag = aimagSelect.value;
+        const district = e.target.value;
+        
+        if (currentAimagType === 'city' && district) {
+          loadHoroos(aimag, district);
+        }
+      });
+    }
+
+    function addAddress() {
+      showNotification('Address form would open here');
+    }
+
+    // Address waterfall data
+    const addressData = {
+      "Улаанбаатар хот": {
+        type: "city",
+        districts: {
+          "Багануур дүүрэг": {
+            horoos: ["1-р хороо", "2-р хороо", "3-р хороо", "4-р хороо"]
+          },
+          "Багахангай дүүрэг": {
+            horoos: ["1-р хороо", "2-р хороо", "3-р хороо", "4-р хороо"]
+          },
+          "Баянгол дүүрэг": {
+            horoos: ["1-р хороо", "2-р хороо", "3-р хороо", "4-р хороо", "5-р хороо", "6-р хороо", "7-р хороо", "8-р хороо", "9-р хороо", "10-р хороо", "11-р хороо", "12-р хороо", "13-р хороо", "14-р хороо", "15-р хороо", "16-р хороо", "17-р хороо", "18-р хороо", "19-р хороо", "20-р хороо", "21-р хороо", "22-р хороо"]
+          },
+          "Баянзүрх дүүрэг": {
+            horoos: ["1-р хороо", "2-р хороо", "3-р хороо", "4-р хороо", "5-р хороо", "6-р хороо", "7-р хороо", "8-р хороо", "9-р хороо", "10-р хороо", "11-р хороо", "12-р хороо", "13-р хороо", "14-р хороо", "15-р хороо", "16-р хороо", "17-р хороо", "18-р хороо", "19-р хороо", "20-р хороо", "21-р хороо", "22-р хороо", "23-р хороо", "24-р хороо", "25-р хороо", "26-р хороо", "27-р хороо"]
+          },
+          "Налайх дүүрэг": {
+            horoos: ["1-р хороо", "2-р хороо", "3-р хороо", "4-р хороо", "5-р хороо", "6-р хороо"]
+          },
+          "Сонгинохайрхан дүүрэг": {
+            horoos: ["1-р хороо", "2-р хороо", "3-р хороо", "4-р хороо", "5-р хороо", "6-р хороо", "7-р хороо", "8-р хороо", "9-р хороо", "10-р хороо", "11-р хороо", "12-р хороо", "13-р хороо", "14-р хороо", "15-р хороо", "16-р хороо", "17-р хороо", "18-р хороо", "19-р хороо", "20-р хороо", "21-р хороо", "22-р хороо", "23-р хороо", "24-р хороо", "25-р хороо", "26-р хороо", "27-р хороо", "28-р хороо", "29-р хороо", "30-р хороо", "31-р хороо", "32-р хороо"]
+          },
+          "Сүхбаатар дүүрэг": {
+            horoos: ["1-р хороо", "2-р хороо", "3-р хороо", "4-р хороо", "5-р хороо", "6-р хороо", "7-р хороо", "8-р хороо", "9-р хороо", "10-р хороо", "11-р хороо", "12-р хороо", "13-р хороо", "14-р хороо", "15-р хороо", "16-р хороо", "17-р хороо", "18-р хороо", "19-р хороо", "20-р хороо"]
+          },
+          "Хан-Уул дүүрэг": {
+            horoos: ["1-р хороо", "2-р хороо", "3-р хороо", "4-р хороо", "5-р хороо", "6-р хороо", "7-р хороо", "8-р хороо", "9-р хороо", "10-р хороо", "11-р хороо", "12-р хороо", "13-р хороо", "14-р хороо", "15-р хороо", "16-р хороо", "17-р хороо", "18-р хороо", "19-р хороо", "20-р хороо"]
+          },
+          "Чингэлтэй дүүрэг": {
+            horoos: ["1-р хороо", "2-р хороо", "3-р хороо", "4-р хороо", "5-р хороо", "6-р хороо", "7-р хороо", "8-р хороо", "9-р хороо", "10-р хороо", "11-р хороо", "12-р хороо", "13-р хороо", "14-р хороо", "15-р хороо", "16-р хороо", "17-р хороо", "18-р хороо", "19-р хороо"]
+          }
+        }
+      },
+      "Архангай аймаг": {
+        type: "aimag",
+        sums: ["Батцэнгэл сум", "Булган сум", "Жаргалант сум", "Их-Тамир сум", "Өгийнуур сум", "Өлзийт сум", "Өндөр-Улаан сум", "Тариат сум", "Төвшрүүлэх сум", "Түшиг сум", "Хайрхан сум", "Хангай сум", "Хашаат сум", "Хотонт сум", "Цахир сум", "Цэнхэр сум", "Цэцэрлэг сум", "Чулуут сум", "Эрдэнэбулган сум", "Эрдэнэмандал сум"]
+      },
+      "Баян-Өлгий аймаг": {
+        type: "aimag",
+        sums: ["Алтай сум", "Алтанцөгц сум", "Баяннуур сум", "Буянт сум", "Булган сум", "Дэлүүн сум", "Ногооннуур сум", "Сагсай сум", "Толбо сум", "Улаанхус сум", "Цэнгэл сум", "Өлгий сум"]
+      },
+      "Баянхонгор аймаг": {
+        type: "aimag",
+        sums: ["Баацагаан сум", "Баян-Өндөр сум", "Баянбулаг сум", "Баянговь сум", "Баянлиг сум", "Баянхонгор сум", "Баянцагаан сум", "Богд сум", "Бөмбөгөр сум", "Бууцагаан сум", "Галуут сум", "Гурванбулаг сум", "Жаргалант сум", "Жинст сум", "Заг сум", "Өлзийт сум", "Хүрээмарал сум", "Цагаанхангай сум", "Шинэжинст сум", "Эрдэнэцогт сум"]
+      }
+    };
+
+    let selectedAimag = '';
+    let selectedDistrictSum = '';
+    let selectedHoroo = '';
+
+    // Store profile data for pre-population
+    const savedAimag = window.__SAVED_ADDRESS__ || {aimag: '', sum: '', horoo: ''};
+
+    function toggleEditAddress() {
+      const form = document.getElementById('addressForm');
+      const saved = document.getElementById('savedAddress');
+      const btn = document.getElementById('editAddressBtn');
+      
+      if (form.classList.contains('hidden')) {
+        form.classList.remove('hidden');
+        saved.classList.add('hidden');
+        btn.textContent = 'Cancel';
+        setupWaterfallLogic();
+        loadExistingAddress();
+      } else {
+        form.classList.add('hidden');
+        saved.classList.remove('hidden');
+        btn.textContent = 'Edit';
+      }
+    }
+
+    function loadExistingAddress() {
+      if (!savedAimag.aimag) return;
+
+      const aimagSelect = document.getElementById('aimagSelect');
+      const districtSumSelect = document.getElementById('districtSumSelect');
+      const horooSelect = document.getElementById('horooSelect');
+      const districtSumContainer = document.getElementById('districtSumContainer');
+      const horooContainer = document.getElementById('horooContainer');
+      const districtSumLabel = document.getElementById('districtSumLabel');
+
+      // Set level 1
+      aimagSelect.value = savedAimag.aimag;
+      selectedAimag = savedAimag.aimag;
+
+      const region = addressData[selectedAimag];
+      if (!region) return;
+
+      // Populate level 2
+      districtSumSelect.innerHTML = '<option value="">-- Select --</option>';
+      
+      if (region.type === 'city') {
+        districtSumLabel.textContent = 'District';
+        Object.keys(region.districts).forEach(district => {
+          const option = document.createElement('option');
+          option.value = district;
+          option.textContent = district;
+          if (district === savedAimag.sum) option.selected = true;
+          districtSumSelect.appendChild(option);
+        });
+      } else {
+        districtSumLabel.textContent = 'Sum';
+        region.sums.forEach(sum => {
+          const option = document.createElement('option');
+          option.value = sum;
+          option.textContent = sum;
+          if (sum === savedAimag.sum) option.selected = true;
+          districtSumSelect.appendChild(option);
+        });
+      }
+
+      districtSumContainer.classList.remove('hidden');
+      selectedDistrictSum = savedAimag.sum;
+
+      // Populate level 3 if Ulaanbaatar
+      if (region.type === 'city' && savedAimag.sum) {
+        const district = region.districts[savedAimag.sum];
+        if (district) {
+          horooSelect.innerHTML = '<option value="">-- Select Horoo --</option>';
+          district.horoos.forEach(horoo => {
+            const option = document.createElement('option');
+            option.value = horoo;
+            option.textContent = horoo;
+            if (horoo === savedAimag.horoo) option.selected = true;
+            horooSelect.appendChild(option);
+          });
+          horooContainer.classList.remove('hidden');
+          selectedHoroo = savedAimag.horoo;
+        }
+      }
+
+      // Show selected address
+      if (selectedAimag && selectedDistrictSum) {
+        updateSelectedAddress();
+      }
+    }
+
+    function cancelEditAddress() {
+      document.getElementById('addressForm').classList.add('hidden');
+      document.getElementById('savedAddress').classList.remove('hidden');
+      document.getElementById('editAddressBtn').textContent = 'Edit';
+      resetAddressForm();
+    }
+
+    function resetAddressForm() {
+      document.getElementById('aimagSelect').value = '';
+      document.getElementById('districtSumContainer').classList.add('hidden');
+      document.getElementById('horooContainer').classList.add('hidden');
+      document.getElementById('selectedAddressDisplay').classList.add('hidden');
+      selectedAimag = '';
+      selectedDistrictSum = '';
+      selectedHoroo = '';
+    }
+
+    function setupWaterfallLogic() {
+      const aimagSelect = document.getElementById('aimagSelect');
+      const districtSumSelect = document.getElementById('districtSumSelect');
+      const horooSelect = document.getElementById('horooSelect');
+      const districtSumContainer = document.getElementById('districtSumContainer');
+      const horooContainer = document.getElementById('horooContainer');
+      const districtSumLabel = document.getElementById('districtSumLabel');
+      const selectedDisplay = document.getElementById('selectedAddressDisplay');
+      const selectedText = document.getElementById('selectedAddressText');
+
+      // Remove old listeners by cloning elements
+      const newAimagSelect = aimagSelect.cloneNode(true);
+      aimagSelect.parentNode.replaceChild(newAimagSelect, aimagSelect);
+      const newDistrictSumSelect = districtSumSelect.cloneNode(true);
+      districtSumSelect.parentNode.replaceChild(newDistrictSumSelect, districtSumSelect);
+      const newHorooSelect = horooSelect.cloneNode(true);
+      horooSelect.parentNode.replaceChild(newHorooSelect, horooSelect);
+
+      // Update references
+      const aimagSelectNew = document.getElementById('aimagSelect');
+      const districtSumSelectNew = document.getElementById('districtSumSelect');
+      const horooSelectNew = document.getElementById('horooSelect');
+
+      // Level 1: Province/City selection
+      aimagSelectNew.addEventListener('change', function() {
+        selectedAimag = this.value;
+        selectedDistrictSum = '';
+        selectedHoroo = '';
+        
+        if (!selectedAimag) {
+          districtSumContainer.classList.add('hidden');
+          horooContainer.classList.add('hidden');
+          selectedDisplay.classList.add('hidden');
+          return;
+        }
+
+        const region = addressData[selectedAimag];
+        
+        // Clear and populate level 2
+        districtSumSelectNew.innerHTML = '<option value="">-- Select --</option>';
+        
+        if (region.type === 'city') {
+          // Ulaanbaatar - show districts
+          districtSumLabel.textContent = 'District';
+          Object.keys(region.districts).forEach(district => {
+            const option = document.createElement('option');
+            option.value = district;
+            option.textContent = district;
+            districtSumSelectNew.appendChild(option);
+          });
+        } else {
+          // Aimag - show sums
+          districtSumLabel.textContent = 'Sum';
+          region.sums.forEach(sum => {
+            const option = document.createElement('option');
+            option.value = sum;
+            option.textContent = sum;
+            districtSumSelectNew.appendChild(option);
+          });
+        }
+        
+        districtSumContainer.classList.remove('hidden');
+        horooContainer.classList.add('hidden');
+        selectedDisplay.classList.add('hidden');
+      });
+
+      // Level 2: District/Sum selection
+      districtSumSelectNew.addEventListener('change', function() {
+        selectedDistrictSum = this.value;
+        selectedHoroo = '';
+        
+        if (!selectedDistrictSum) {
+          horooContainer.classList.add('hidden');
+          selectedDisplay.classList.add('hidden');
+          return;
+        }
+
+        const region = addressData[selectedAimag];
+        
+        if (region.type === 'city') {
+          // Show horoo selection for Ulaanbaatar
+          const district = region.districts[selectedDistrictSum];
+          horooSelectNew.innerHTML = '<option value="">-- Select Horoo --</option>';
+          
+          district.horoos.forEach(horoo => {
+            const option = document.createElement('option');
+            option.value = horoo;
+            option.textContent = horoo;
+            horooSelectNew.appendChild(option);
+          });
+          
+          horooContainer.classList.remove('hidden');
+          selectedDisplay.classList.add('hidden');
+        } else {
+          // Aimag - no horoo, show final address
+          horooContainer.classList.add('hidden');
+          updateSelectedAddress();
+        }
+      });
+
+      // Level 3: Horoo selection (only for Ulaanbaatar)
+      horooSelectNew.addEventListener('change', function() {
+        selectedHoroo = this.value;
+        if (selectedHoroo) {
+          updateSelectedAddress();
+        } else {
+          selectedDisplay.classList.add('hidden');
+        }
+      });
+    }
+
+    function updateSelectedAddress() {
+      const selectedDisplay = document.getElementById('selectedAddressDisplay');
+      const selectedText = document.getElementById('selectedAddressText');
+      
+      let addressParts = [selectedAimag, selectedDistrictSum];
+      if (selectedHoroo) addressParts.push(selectedHoroo);
+      
+      selectedText.textContent = addressParts.join(' > ');
+      selectedDisplay.classList.remove('hidden');
+    }
+
+    async function saveAddress() {
+      if (!selectedAimag || !selectedDistrictSum) {
+        showNotification('❌ Please select your address', 'error');
+        return;
+      }
+
+      const region = addressData[selectedAimag];
+      if (region.type === 'city' && !selectedHoroo) {
+        showNotification('❌ Please select your horoo', 'error');
+        return;
+      }
+      
+      const additionalDetails = document.getElementById('addressDetails').value;
+      
+      try {
+        const response = await fetch('/api/profile/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: window.__USER_ID__,
+            aimag: selectedAimag,
+            sum: selectedDistrictSum,
+            horoo: selectedHoroo || null,
+            addressDetail: additionalDetails || null
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showNotification('✅ Address saved successfully!');
+          cancelEditAddress();
+          setTimeout(() => window.location.reload(), 1500);
+        } else {
+          showNotification('❌ Error: ' + (data.error || 'Failed to save address'), 'error');
+        }
+      } catch (error) {
+        console.error('Save address error:', error);
+        showNotification('❌ Network error. Please try again.', 'error');
+      }
+    }
+
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        showNotification('Logging out...');
+        setTimeout(function() {
+          window.location.href = '/shop';
+        }, 1000);
+      }
+    }
+
+    function showNotification(message, type = 'success') {
+      const notification = document.createElement('div');
+      const bgColor = type === 'error' ? 'bg-red-500' : 'bg-green-500';
+      notification.className = `fixed top-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-slide-in`;
+      notification.textContent = message;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(function() {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateX(400px)';
+        notification.style.transition = 'all 0.3s ease';
+        setTimeout(function() {
+          notification.remove();
+        }, 300);
+      }, 3000);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      loadWishlist();
+      updateWishlistCount();
+      
+      document.querySelectorAll('.profile-nav-btn').forEach(function(btn) {
+        if (btn.classList.contains('active')) {
+          btn.classList.add('bg-orange-50', 'text-orange-600', 'font-medium');
+        } else {
+          btn.classList.add('text-gray-700', 'hover:bg-gray-50');
+        }
+      });
+      
+      document.querySelectorAll('.profile-nav-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.profile-nav-btn').forEach(function(b) {
+            b.classList.remove('bg-orange-50', 'text-orange-600', 'font-medium', 'active');
+            b.classList.add('text-gray-700', 'hover:bg-gray-50');
+          });
+          
+          btn.classList.add('bg-orange-50', 'text-orange-600', 'font-medium', 'active');
+          btn.classList.remove('text-gray-700', 'hover:bg-gray-50');
+        });
+      });
+    });
+
+    async function loadWishlist() {
+      try {
+        if (!window.__USER_ID__ || window.__USER_ID__ === '') {
+          console.error('No user ID found - user not authenticated');
+          showNotification('❌ Please log in to view your wishlist', 'error');
+          renderWishlist([]);
+          updateWishlistCount(0);
+          return;
+        }
+        
+        const response = await fetch(`/api/wishlist?userId=${window.__USER_ID__}`);
+        const data = await response.json();
+        
+        if (data.success) {
+          renderWishlist(data.wishlist || []);
+          updateWishlistCount(data.count || 0);
+        } else {
+          console.error('Wishlist error:', data.error);
+          showNotification(`❌ ${data.error}`, 'error');
+          renderWishlist([]);
+          updateWishlistCount(0);
+        }
+      } catch (error) {
+        console.error('Error loading wishlist:', error);
+        showNotification('❌ Error loading wishlist. Please try again.', 'error');
+        renderWishlist([]);
+        updateWishlistCount(0);
+      }
+    }
+
+    function renderWishlist(wishlist) {
+      const emptyWishlist = document.getElementById('emptyWishlist');
+      const wishlistGrid = document.getElementById('wishlistGrid');
+      
+      console.log('Rendering wishlist:', wishlist);
+      
+      if (!wishlist || wishlist.length === 0) {
+        if (emptyWishlist) emptyWishlist.classList.remove('hidden');
+        if (wishlistGrid) wishlistGrid.classList.add('hidden');
+        return;
+      }
+      
+      if (emptyWishlist) emptyWishlist.classList.add('hidden');
+      if (wishlistGrid) {
+        wishlistGrid.classList.remove('hidden');
+        
+        wishlistGrid.innerHTML = wishlist.map(item => {
+          const addedDate = new Date(item.addedAt).toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+          });
+          
+          const rating = item.rating ? '⭐'.repeat(Math.floor(item.rating)) : '';
+          
+          return `
+            <div class="bg-white border-2 border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all">
+              <div class="flex flex-col sm:flex-row">
+                <div class="w-full sm:w-40 h-40 bg-gray-100 flex-shrink-0 relative">
+                  <img 
+                    src="${item.image || 'https://via.placeholder.com/400x300?text=No+Image'}" 
+                    alt="${item.name || 'Product'}"
+                    class="w-full h-full object-cover"
+                    onerror="this.src='https://via.placeholder.com/400x300?text=No+Image';"
+                  />
+                  ${item.stock_quantity === 0 ? '<div class="absolute inset-0 bg-red-500 bg-opacity-20 flex items-center justify-center"><span class="bg-red-500 text-white px-2 py-1 rounded text-xs font-bold">OUT OF STOCK</span></div>' : ''}
+                </div>
+                <div class="flex-1 p-4 flex flex-col">
+                  <div class="flex items-start justify-between mb-2">
+                    <div class="flex-1">
+                      <h3 class="text-lg font-bold text-gray-900 mb-1">${item.name || 'Unnamed Product'}</h3>
+                      <p class="text-sm text-gray-600 mb-2 line-clamp-2">${item.description || 'No description available'}</p>
+                      ${rating ? `<p class="text-sm text-yellow-500 mb-1">${rating} (${item.rating})</p>` : ''}
+                      <p class="text-xs text-gray-400">Added on ${addedDate}</p>
+                    </div>
+                    <button 
+                      onclick="removeFromWishlist(${item.productId})"
+                      class="text-red-500 hover:text-red-700 ml-3 flex-shrink-0 p-1 rounded-full hover:bg-red-50 transition-colors"
+                      title="Remove from wishlist"
+                    >
+                      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                      </svg>
+                    </button>
+                  </div>
+                  <div class="mt-auto flex items-center justify-between">
+                    <div class="flex flex-col">
+                      <span class="text-2xl font-bold text-orange-600">$${parseFloat(item.price || 0).toFixed(2)}</span>
+                      <span class="text-xs text-gray-500">${item.stock_quantity || 0} in stock</span>
+                    </div>
+                    <button 
+                      onclick="addToCartFromWishlist(${item.productId}, '${(item.name || '').replace(/'/g, "\\'")}', ${item.price || 0}, '${(item.image || '').replace(/'/g, "\\'")}', ${item.stock_quantity || 0})" 
+                      class="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors font-medium flex items-center gap-2 ${item.stock_quantity === 0 ? 'opacity-50 cursor-not-allowed bg-gray-400' : ''}"
+                      ${item.stock_quantity === 0 ? 'disabled' : ''}
+                    >
+                      ${item.stock_quantity === 0 ? 
+                        '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18 12M6 6l12 12"></path></svg> Out of Stock' : 
+                        '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m4.5-5a2 2 0 100 4 2 2 0 000-4zm6 0a2 2 0 100 4 2 2 0 000-4z"></path></svg> Add to Cart'
+                      }
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    async function removeFromWishlist(productId) {
+      try {
+        console.log('Removing product', productId, 'from wishlist for user', window.__USER_ID__);
+        
+        const response = await fetch(`/api/wishlist?userId=${window.__USER_ID__}&productId=${productId}`, {
+          method: 'DELETE'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          const productName = data.data?.productName || 'Product';
+          showNotification(`💔 ${productName} removed from wishlist`);
+          // Reload page to show updated wishlist from database
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        } else {
+          console.error('Remove error:', data.error);
+          if (data.notFound) {
+            showNotification('❌ Item not found in wishlist', 'error');
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
+          } else {
+            showNotification(`❌ ${data.error}`, 'error');
+          }
+        }
+      } catch (error) {
+        console.error('Error removing from wishlist:', error);
+        showNotification('❌ Failed to remove from wishlist. Please try again.', 'error');
+      }
+    }
+
+    function addToCartFromWishlist(productId, productName, productPrice, productImage, stockQuantity) {
+      try {
+        if (stockQuantity === 0) {
+          showNotification('❌ Sorry, this item is out of stock', 'error');
+          return;
+        }
+        
+        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        const existingItemIndex = cart.findIndex(item => item.id === productId);
+        
+        if (existingItemIndex > -1) {
+          const newQuantity = cart[existingItemIndex].quantity + 1;
+          
+          if (newQuantity > stockQuantity) {
+            showNotification(`❌ Only ${stockQuantity} items available in stock`, 'error');
+            return;
+          }
+          
+          cart[existingItemIndex].quantity = newQuantity;
+          showNotification(`✓ Updated ${productName} quantity in cart! (${newQuantity})`);
+        } else {
+          cart.push({
+            id: productId,
+            name: productName,
+            price: productPrice,
+            image: productImage,
+            quantity: 1,
+            maxStock: stockQuantity
+          });
+          showNotification(`✓ ${productName} added to cart!`);
+        }
+        
+        localStorage.setItem('cart', JSON.stringify(cart));
+        
+        // Update cart count if there's a cart counter on the page
+        const event = new CustomEvent('cartUpdated', { 
+          detail: { 
+            action: 'add', 
+            productId, 
+            productName,
+            totalItems: cart.reduce((sum, item) => sum + item.quantity, 0)
+          } 
+        });
+        window.dispatchEvent(event);
+        
+      } catch (error) {
+        console.error('Error adding to cart:', error);
+        showNotification('❌ Failed to add to cart', 'error');
+      }
+    }
+
+    function updateWishlistCount(count) {
+      const countElement = document.getElementById('wishlistCount');
+      if (countElement) {
+        if (count !== undefined) {
+          countElement.textContent = count;
+        } else {
+          fetch(`/api/wishlist?userId=${window.__USER_ID__}`)
+            .then(res => res.json())
+            .then(data => {
+              if (data.success) {
+                countElement.textContent = data.count || 0;
+              }
+            })
+            .catch(error => {
+              console.error('Error updating wishlist count:', error);
+            });
+        }
+      }
+    }
+  </script>
+</Layout>

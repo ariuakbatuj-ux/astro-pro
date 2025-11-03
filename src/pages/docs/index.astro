@@ -1,0 +1,269 @@
+---
+import DocsLayout from '../../layouts/docs/DocsLayout.astro';
+---
+
+<DocsLayout 
+  title="Technical Documentation Overview" 
+  description="Complete system documentation with all 25 functions, architecture diagrams, and implementation details"
+>
+  <!-- Hero Section -->
+  <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-8 mb-8 border border-blue-100">
+    <div class="flex items-start space-x-6">
+      <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center flex-shrink-0">
+        <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+      </div>
+      <div class="flex-1">
+        <h1 class="text-3xl font-bold text-gray-900 mb-3">Complete Technical Documentation</h1>
+        <p class="text-lg text-gray-700 mb-4">
+          Comprehensive documentation covering all 25 functions, system architecture, and complete implementation details 
+          for the product management system.
+        </p>
+        <div class="flex flex-wrap gap-3">
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+            📋 25 Functions Documented
+          </span>
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+            🏗️ Complete Architecture
+          </span>
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+            🗺️ File Mapping Complete
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Stats -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+      <div class="flex items-center space-x-3 mb-3">
+        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+          <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+          </svg>
+        </div>
+        <h3 class="font-semibold text-gray-900">Frontend Functions</h3>
+      </div>
+      <p class="text-2xl font-bold text-blue-600 mb-2">14 Functions</p>
+      <p class="text-sm text-gray-600">JavaScript functions handling UI interactions, form processing, and file uploads</p>
+    </div>
+
+    <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+      <div class="flex items-center space-x-3 mb-3">
+        <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+          <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2"/>
+          </svg>
+        </div>
+        <h3 class="font-semibold text-gray-900">Backend Functions</h3>
+      </div>
+      <p class="text-2xl font-bold text-green-600 mb-2">11 Functions</p>
+      <p class="text-sm text-gray-600">Server-side controllers, middleware, and database operations</p>
+    </div>
+
+    <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+      <div class="flex items-center space-x-3 mb-3">
+        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+          <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+        </div>
+        <h3 class="font-semibold text-gray-900">Documentation Pages</h3>
+      </div>
+      <p class="text-2xl font-bold text-purple-600 mb-2">8 Sections</p>
+      <p class="text-sm text-gray-600">Comprehensive guides covering every aspect of the system</p>
+    </div>
+  </div>
+
+  <!-- Main Documentation Sections -->
+  <div class="space-y-8">
+    <!-- Function Reference Section -->
+    <section>
+      <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+        <span class="text-2xl mr-3">📋</span>
+        Function Reference
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <a 
+          href="/docs/functions" 
+          class="block bg-white rounded-lg p-6 border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all group"
+        >
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-semibold text-gray-900 group-hover:text-blue-600">Complete Function Inventory</h3>
+            <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </div>
+          <p class="text-gray-600 text-sm mb-3">
+            Detailed documentation of all 25 functions with exact line numbers, purposes, and code examples.
+          </p>
+          <div class="flex items-center space-x-4 text-xs text-gray-500">
+            <span>✓ Frontend Functions</span>
+            <span>✓ Backend Controllers</span>
+            <span>✓ Middleware</span>
+          </div>
+        </a>
+
+        <a 
+          href="/docs/frontend-functions" 
+          class="block bg-white rounded-lg p-6 border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all group"
+        >
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-semibold text-gray-900 group-hover:text-blue-600">Frontend Functions</h3>
+            <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </div>
+          <p class="text-gray-600 text-sm mb-3">
+            Browser-side JavaScript functions handling user interactions, form validation, and file uploads.
+          </p>
+          <div class="flex items-center space-x-4 text-xs text-gray-500">
+            <span>✓ DOM Manipulation</span>
+            <span>✓ Event Handlers</span>
+            <span>✓ File Processing</span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- Architecture Section -->
+    <section>
+      <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+        <span class="text-2xl mr-3">🏗️</span>
+        System Architecture
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <a 
+          href="/docs/architecture" 
+          class="block bg-white rounded-lg p-6 border border-gray-200 hover:border-green-300 hover:shadow-md transition-all group"
+        >
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-semibold text-gray-900 group-hover:text-green-600">Architecture Overview</h3>
+            <svg class="w-4 h-4 text-gray-400 group-hover:text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </div>
+          <p class="text-gray-600 text-sm mb-3">
+            Visual flow diagrams showing complete request cycle and system interactions.
+          </p>
+          <div class="flex items-center space-x-4 text-xs text-gray-500">
+            <span>✓ Request Flow</span>
+            <span>✓ Data Pipeline</span>
+            <span>✓ Component Interaction</span>
+          </div>
+        </a>
+
+        <a 
+          href="/docs/request-flow" 
+          class="block bg-white rounded-lg p-6 border border-gray-200 hover:border-green-300 hover:shadow-md transition-all group"
+        >
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-semibold text-gray-900 group-hover:text-green-600">Request Flow Diagrams</h3>
+            <svg class="w-4 h-4 text-gray-400 group-hover:text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </div>
+          <p class="text-gray-600 text-sm mb-3">
+            Step-by-step execution order and data transformation from user input to database.
+          </p>
+          <div class="flex items-center space-x-4 text-xs text-gray-500">
+            <span>✓ User Actions</span>
+            <span>✓ Server Processing</span>
+            <span>✓ Database Updates</span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- File Structure Section -->
+    <section>
+      <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+        <span class="text-2xl mr-3">🗺️</span>
+        File Structure & Navigation
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <a 
+          href="/docs/file-locations" 
+          class="block bg-white rounded-lg p-6 border border-gray-200 hover:border-purple-300 hover:shadow-md transition-all group"
+        >
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-semibold text-gray-900 group-hover:text-purple-600">File Locations Map</h3>
+            <svg class="w-4 h-4 text-gray-400 group-hover:text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </div>
+          <p class="text-gray-600 text-sm mb-3">
+            Exact file locations, web URLs, and line numbers where each function lives.
+          </p>
+          <div class="flex items-center space-x-4 text-xs text-gray-500">
+            <span>✓ File Paths</span>
+            <span>✓ URL Endpoints</span>
+            <span>✓ Line Numbers</span>
+          </div>
+        </a>
+
+        <a 
+          href="/docs/search" 
+          class="block bg-white rounded-lg p-6 border border-gray-200 hover:border-purple-300 hover:shadow-md transition-all group"
+        >
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-semibold text-gray-900 group-hover:text-purple-600">Search & Navigation</h3>
+            <svg class="w-4 h-4 text-gray-400 group-hover:text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </div>
+          <p class="text-gray-600 text-sm mb-3">
+            Powerful search system to instantly find any function, file, or documentation.
+          </p>
+          <div class="flex items-center space-x-4 text-xs text-gray-500">
+            <span>✓ Action Mapping</span>
+            <span>✓ Function Calls</span>
+            <span>✓ Dependencies</span>
+          </div>
+        </a>
+      </div>
+    </section>
+  </div>
+
+  <!-- Quick Links -->
+  <div class="bg-white rounded-xl p-6 border border-gray-200 mt-8">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Access</h3>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <a href="/docs/functions" class="text-center p-4 rounded-lg bg-gray-50 hover:bg-blue-50 transition-colors group">
+        <div class="text-2xl mb-2">📋</div>
+        <div class="text-sm font-medium text-gray-700 group-hover:text-blue-600">All Functions</div>
+      </a>
+      <a href="/docs/architecture" class="text-center p-4 rounded-lg bg-gray-50 hover:bg-green-50 transition-colors group">
+        <div class="text-2xl mb-2">🏗️</div>
+        <div class="text-sm font-medium text-gray-700 group-hover:text-green-600">Architecture</div>
+      </a>
+      <a href="/docs/file-locations" class="text-center p-4 rounded-lg bg-gray-50 hover:bg-purple-50 transition-colors group">
+        <div class="text-2xl mb-2">🗺️</div>
+        <div class="text-sm font-medium text-gray-700 group-hover:text-purple-600">File Map</div>
+      </a>
+      <a href="/docs/image-upload" class="text-center p-4 rounded-lg bg-gray-50 hover:bg-orange-50 transition-colors group">
+        <div class="text-2xl mb-2">🖼️</div>
+        <div class="text-sm font-medium text-gray-700 group-hover:text-orange-600">Image System</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Footer Note -->
+  <div class="bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg p-6 mt-8 border border-gray-200">
+    <div class="flex items-start space-x-3">
+      <svg class="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <div>
+        <h4 class="font-medium text-gray-900 mb-1">Complete Documentation Coverage</h4>
+        <p class="text-sm text-gray-600">
+          This documentation covers every aspect of the product management system, from individual function implementations 
+          to complete system architecture. Use the navigation sidebar to explore specific sections or search for particular 
+          functions and concepts.
+        </p>
+      </div>
+    </div>
+  </div>
+</DocsLayout>

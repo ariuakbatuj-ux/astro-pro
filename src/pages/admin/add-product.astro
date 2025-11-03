@@ -1,0 +1,30 @@
+---
+import AdminLayout from '../../layouts/admin/AdminLayout.astro';
+import { ProductForm } from '../../components/admin/ProductForm';
+---
+
+<AdminLayout title="Add Product">
+  <div class="max-w-6xl mx-auto">
+    <!-- Page Header -->
+    <div class="mb-8">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-800 mb-2">Add New Product</h1>
+          <p class="text-gray-600">Create a new product listing with images, variations, and inventory management</p>
+        </div>
+        
+        <div class="flex space-x-3">
+          <a 
+            href="/admin/products" 
+            class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            Cancel
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Form -->
+    <ProductForm client:load />
+  </div>
+</AdminLayout>
