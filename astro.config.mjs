@@ -11,6 +11,7 @@ import { defineConfig } from 'astro/config';
 export default defineConfig({
 	site: 'https://example.com',
 	output: 'server',
+	//ariuka tenege
 	integrations: [mdx(), sitemap(), tailwind(), react()],
 	server: {
 		port: 3656, 
@@ -19,5 +20,5 @@ export default defineConfig({
 	devToolbar: {
 		enabled: false
 	}
-	
+
 });
